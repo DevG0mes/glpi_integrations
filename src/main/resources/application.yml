@@ -1,0 +1,30 @@
+glpi:
+  test-on-startup: false
+  health:
+    enabled: true
+  api:
+    # LEGACY_APIREST (apirest.php) ou LEGACY_VIA_ROUTER (api.php/v1). Ver docs/API_VALIDATION.md
+    style: ${GLPI_API_STYLE:LEGACY_APIREST}
+    base-url: ${GLPI_API_BASE_URL:http://localhost/glpi/apirest.php}
+    app-token: ${GLPI_APP_TOKEN:}
+    user-token: ${GLPI_USER_TOKEN:}
+  sync:
+    enabled: false
+    delay-ms: 500
+    schedule-delay-ms: 3600000
+    input-path: ${GLPI_SYNC_INPUT:}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when_authorized
+
+spring:
+  application:
+    name: glpi-integration
+  config:
+    import: optional:classpath:application-local.properties

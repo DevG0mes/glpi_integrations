@@ -1,0 +1,10 @@
+# Copie para application-local.properties (gitignored) e preencha com seus valores.
+glpi.test-on-startup=true
+glpi.api.style=LEGACY_APIREST
+# Ex.: http://192.168.1.98/apirest.php
+glpi.api.base-url=http://SEU_SERVIDOR_GLPI/apirest.php
+glpi.api.app-token=SEU_APP_TOKEN
+glpi.api.user-token=SEU_USER_TOKEN
+server.port=8081
+# glpi.sync.enabled=false
+# glpi.sync.input-path=C:\\caminho\\ativos.csv

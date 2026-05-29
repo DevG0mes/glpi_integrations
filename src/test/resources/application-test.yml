@@ -1,0 +1,8 @@
+glpi:
+  test-on-startup: false
+  health:
+    enabled: false
+  api:
+    base-url: http://localhost/glpi/apirest.php
+    app-token: test-app
+    user-token: test-user
