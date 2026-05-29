@@ -9,9 +9,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriBuilder;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -79,11 +81,28 @@ public class GlpiApiClient {
             String range,
             boolean expandDropdowns) {
         return restClient.get()
+                .uri(uriBuilder -> buildItemTypeUri(uriBuilder, itemType, range, expandDropdowns))
+                .headers(headers -> applySessionHeaders(headers, sessionToken))
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, (request, response) -> {
+                    throw errorFromResponse(response.getStatusCode(), readBody(response));
+                })
+                .toEntity(String.class);
+    }
+
+    public String getComputer(String sessionToken, int computerId, boolean expandDropdowns) {
+        return getItem(sessionToken, "Computer", computerId, expandDropdowns);
+    }
+
+    public void updateComputer(String sessionToken, int computerId, Map<String, Object> inputFields) {
+        updateItem(sessionToken, "Computer", computerId, inputFields);
+    }
+
+    public String getItem(String sessionToken, String itemType, int itemId, boolean expandDropdowns) {
+        return restClient.get()
                 .uri(uriBuilder -> {
-                    var builder = uriBuilder.path(itemType + "/");
-                    if (range != null && !range.isBlank()) {
-                        builder.queryParam("range", range);
-                    }
+                    UriBuilder builder = appendItemTypeSegments(uriBuilder, itemType)
+                            .pathSegment(String.valueOf(itemId));
                     if (expandDropdowns) {
                         builder.queryParam("expand_dropdowns", "true");
                     }
@@ -94,41 +113,85 @@ public class GlpiApiClient {
                 .onStatus(HttpStatusCode::isError, (request, response) -> {
                     throw errorFromResponse(response.getStatusCode(), readBody(response));
                 })
-                .toEntity(String.class);
-    }
-
-    public String getComputer(String sessionToken, int computerId, boolean expandDropdowns) {
-        return restClient.get()
-                .uri(uriBuilder -> {
-                    var builder = uriBuilder.path("Computer/{id}");
-                    if (expandDropdowns) {
-                        builder.queryParam("expand_dropdowns", "true");
-                    }
-                    return builder.build(computerId);
-                })
-                .headers(headers -> applySessionHeaders(headers, sessionToken))
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, (request, response) -> {
-                    throw errorFromResponse(response.getStatusCode(), readBody(response));
-                })
                 .body(String.class);
     }
 
-    public void updateComputer(String sessionToken, int computerId, Map<String, Object> inputFields) {
-        Map<String, Object> payload = Map.of("input", inputFields);
+    public void updateItem(String sessionToken, String itemType, int itemId, Map<String, Object> inputFields) {
+        Map<String, Object> payload = Map.of("input", enrichInput(itemId, inputFields));
 
         restClient.put()
-                .uri(uriBuilder -> uriBuilder
-                        .path("Computer/{id}")
+                .uri(uriBuilder -> appendItemTypeSegments(uriBuilder, itemType)
+                        .pathSegment(String.valueOf(itemId))
                         .queryParam("session_write", "true")
-                        .build(computerId))
+                        .build())
+                .headers(headers -> applySessionHeaders(headers, sessionToken))
+                .body(payload)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, (request, response) -> {
+                    String body = readBody(response);
+                    throw errorFromResponse(
+                            response.getStatusCode(),
+                            "PUT " + itemType + "/" + itemId + " campos=" + inputFields.keySet() + " → " + body);
+                })
+                .toBodilessEntity();
+    }
+
+    public int createItem(String sessionToken, String itemType, Map<String, Object> inputFields) {
+        Map<String, Object> payload = Map.of("input", inputFields);
+
+        String body = restClient.post()
+                .uri(uriBuilder -> appendItemTypeSegments(uriBuilder, itemType)
+                        .queryParam("session_write", "true")
+                        .build())
                 .headers(headers -> applySessionHeaders(headers, sessionToken))
                 .body(payload)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, (request, response) -> {
                     throw errorFromResponse(response.getStatusCode(), readBody(response));
                 })
-                .toBodilessEntity();
+                .body(String.class);
+
+        return parseCreatedId(body);
+    }
+
+    private static java.net.URI buildItemTypeUri(
+            UriBuilder uriBuilder,
+            String itemType,
+            String range,
+            boolean expandDropdowns) {
+        UriBuilder builder = appendItemTypeSegments(uriBuilder, itemType);
+        if (range != null && !range.isBlank()) {
+            builder.queryParam("range", range);
+        }
+        if (expandDropdowns) {
+            builder.queryParam("expand_dropdowns", "true");
+        }
+        return builder.build();
+    }
+
+    static Map<String, Object> enrichInput(int itemId, Map<String, Object> inputFields) {
+        Map<String, Object> input = new LinkedHashMap<>(inputFields);
+        input.put("id", itemId);
+        return input;
+    }
+
+    private static UriBuilder appendItemTypeSegments(UriBuilder uriBuilder, String itemType) {
+        UriBuilder builder = uriBuilder;
+        for (String segment : GlpiItemTypePath.toPathSegments(itemType)) {
+            builder = builder.pathSegment(segment);
+        }
+        return builder;
+    }
+
+    private int parseCreatedId(String body) {
+        if (body == null || body.isBlank()) {
+            throw new GlpiApiException(HttpStatus.BAD_GATEWAY, "Resposta vazia ao criar item");
+        }
+        Matcher matcher = Pattern.compile("\"id\"\\s*:\\s*(\\d+)").matcher(body);
+        if (matcher.find()) {
+            return Integer.parseInt(matcher.group(1));
+        }
+        throw new GlpiApiException(HttpStatus.BAD_GATEWAY, "ID não encontrado na resposta de criação: " + body);
     }
 
     private void applySessionHeaders(HttpHeaders headers, String sessionToken) {
@@ -170,7 +233,9 @@ public class GlpiApiClient {
     }
 
     private GlpiApiException errorFromResponse(HttpStatusCode status, String body) {
-        String message = body != null && !body.isBlank() ? body : status.toString();
+        String raw = body != null && !body.isBlank() ? body : status.toString();
+        String parsed = GlpiApiErrorParser.humanMessage(raw);
+        String message = parsed.isBlank() ? raw : parsed;
         return new GlpiApiException(status, message);
     }
 }

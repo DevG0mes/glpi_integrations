@@ -1,0 +1,23 @@
+services:
+  glpi-integration:
+    build: .
+    ports:
+      - "8081:8081"
+    env_file:
+      - .env
+    environment:
+      GLPI_API_STYLE: ${GLPI_API_STYLE:-LEGACY_APIREST}
+      GLPI_API_BASE_URL: ${GLPI_API_BASE_URL}
+      GLPI_APP_TOKEN: ${GLPI_APP_TOKEN}
+      GLPI_USER_TOKEN: ${GLPI_USER_TOKEN}
+      GLPI_ITEMTYPE_STARLINK: ${GLPI_ITEMTYPE_STARLINK:-CONFIGURE_NO_GLPI_Starlink}
+      GLPI_ITEMTYPE_CHIP: ${GLPI_ITEMTYPE_CHIP:-CONFIGURE_NO_GLPI_Chip}
+      GLPI_ITEMTYPE_CELULAR: ${GLPI_ITEMTYPE_CELULAR:-CONFIGURE_NO_GLPI_Celular}
+    volumes:
+      - ./data:/data:ro
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8081/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s

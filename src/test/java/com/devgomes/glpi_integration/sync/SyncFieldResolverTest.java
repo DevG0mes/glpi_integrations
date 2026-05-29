@@ -12,12 +12,18 @@ class SyncFieldResolverTest {
     void toUpdateRequest_resolvesLoginAndStatusLabel() {
         var row = new AssetUpdateRow(
                 2, 1558, null, null, "evellyn.cavalcante", null, "Em uso",
-                6, "CTVMLZ1", null, null);
+                6, "CTVMLZ1", null, null,
+                null, null, null, null, null, null, null, null, null);
 
-        var request = SyncFieldResolver.toUpdateRequest(
-                row,
+        var indexes = new SyncLookupIndexes(
                 Map.of("evellyn.cavalcante", 99),
-                Map.of("em uso", 3));
+                Map.of("em uso", 3),
+                Map.of(),
+                Map.of(),
+                Map.of(),
+                Map.of());
+
+        var request = SyncFieldResolver.toUpdateRequest(row, indexes);
 
         assertThat(request.usersId()).isEqualTo(99);
         assertThat(request.statesId()).isEqualTo(3);

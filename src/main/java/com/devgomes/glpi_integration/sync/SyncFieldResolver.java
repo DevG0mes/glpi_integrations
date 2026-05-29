@@ -1,9 +1,11 @@
 package com.devgomes.glpi_integration.sync;
 
+import com.devgomes.glpi_integration.config.GlpiCustomAssetsProperties;
 import com.devgomes.glpi_integration.dto.ComputerUpdateRequest;
 import com.devgomes.glpi_integration.service.GlpiIntegrationService;
 
 import java.text.Normalizer;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 
@@ -15,33 +17,109 @@ public final class SyncFieldResolver {
     private SyncFieldResolver() {
     }
 
-    public static ComputerUpdateRequest toUpdateRequest(
-            AssetUpdateRow row,
-            Map<String, Integer> usersByLogin,
-            Map<String, Integer> statesByLabel) {
-        Integer usersId = row.usersId();
-        if (usersId == null && row.responsibleLogin() != null) {
-            usersId = usersByLogin.get(normalizeLabelKey(row.responsibleLogin()));
-        }
-
-        Integer statesId = row.statesId();
-        if (statesId == null && row.statusLabel() != null) {
-            statesId = statesByLabel.get(normalizeLabelKey(row.statusLabel()));
-        }
+    public static ComputerUpdateRequest toUpdateRequest(AssetUpdateRow row, SyncLookupIndexes indexes) {
+        Integer usersId = resolveUserId(row.usersId(), row.responsibleLogin(), indexes.usersByLogin());
+        Integer statesId = resolveStateId(row.statesId(), row.statusLabel(), indexes.statesByLabel());
+        Integer groupsId = resolveId(row.groupsId(), row.groupLabel(), indexes.groupsByLabel());
+        Integer locationsId = resolveId(row.locationsId(), row.locationLabel(), indexes.locationsByLabel());
+        Integer typesId = resolveId(row.computertypesId(), row.computerTypeLabel(), indexes.computerTypesByLabel());
+        Integer manufacturersId = resolveId(row.manufacturersId(), row.manufacturerLabel(), indexes.manufacturersByLabel());
 
         return new ComputerUpdateRequest(
                 usersId,
-                null,
-                null,
+                groupsId,
+                locationsId,
                 statesId,
                 row.computermodelsId(),
-                null,
-                null,
-                null,
+                typesId,
+                manufacturersId,
+                row.displayName(),
                 row.serial(),
                 row.otherserial(),
                 row.comment()
         );
+    }
+
+    public static Map<String, Object> resolveCustomAssetFields(
+            String assetKey,
+            CustomAssetRow row,
+            GlpiCustomAssetsProperties.CustomAssetDefinition definition,
+            SyncLookupIndexes indexes) {
+        Map<String, Object> input = new LinkedHashMap<>();
+        for (Map.Entry<String, String> entry : row.values().entrySet()) {
+            GlpiCustomAssetsProperties.FieldMapping mapping = definition.columns().get(entry.getKey());
+            if (mapping == null) {
+                continue;
+            }
+            if (isNullLiteral(entry.getValue()) || entry.getValue().trim().isEmpty()) {
+                continue;
+            }
+            Object value = resolveCustomValue(mapping, entry.getValue(), indexes);
+            if (value != null) {
+                input.put(mapping.glpiField(), value);
+            }
+        }
+        return input;
+    }
+
+    private static Object resolveCustomValue(
+            GlpiCustomAssetsProperties.FieldMapping mapping,
+            String raw,
+            SyncLookupIndexes indexes) {
+        if (SyncFieldResolver.isNullLiteral(raw)) {
+            return null;
+        }
+        return switch (mapping.resolverType()) {
+            case DIRECT, SENSITIVE, NATURAL_KEY -> raw.trim();
+            case USER_LOGIN -> {
+                if (isNumeric(raw)) {
+                    yield Integer.parseInt(raw.trim());
+                }
+                yield indexes.usersByLogin().get(normalizeLabelKey(raw));
+            }
+            case STATE_LABEL -> {
+                if (isNumeric(raw)) {
+                    yield Integer.parseInt(raw.trim());
+                }
+                yield indexes.statesByLabel().get(normalizeLabelKey(raw));
+            }
+            case LOCATION_LABEL -> {
+                if (isNumeric(raw)) {
+                    yield Integer.parseInt(raw.trim());
+                }
+                yield indexes.locationsByLabel().get(normalizeLabelKey(raw));
+            }
+        };
+    }
+
+    private static Integer resolveUserId(Integer id, String label, Map<String, Integer> index) {
+        if (id != null) {
+            return id;
+        }
+        if (label == null) {
+            return null;
+        }
+        return index.get(normalizeLabelKey(label));
+    }
+
+    private static Integer resolveStateId(Integer id, String label, Map<String, Integer> index) {
+        if (id != null) {
+            return id;
+        }
+        if (label == null) {
+            return null;
+        }
+        return index.get(normalizeLabelKey(label));
+    }
+
+    private static Integer resolveId(Integer id, String label, Map<String, Integer> index) {
+        if (id != null) {
+            return id;
+        }
+        if (label == null) {
+            return null;
+        }
+        return index.get(normalizeLabelKey(label));
     }
 
     public static String normalizeLabelKey(String value) {

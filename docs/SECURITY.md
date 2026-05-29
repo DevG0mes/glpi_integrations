@@ -12,3 +12,11 @@
 ## Logs
 
 A aplicação não registra tokens de sessão completos. O teste de startup exibe apenas um prefixo do `session_token`.
+
+## Senhas (Starlink)
+
+- Campos `senha_conta_starlink` e `senha_roteador` são tratados como **sensíveis**.
+- Endpoints `/validate` retornam `***` no lugar das senhas no relatório.
+- Não inclua senhas reais em planilhas versionadas no Git.
+- No GLPI, use tipo de campo **senha** quando disponível na definição de ativo.
+- Restrinja no GLPI quem pode visualizar/editar esses campos.

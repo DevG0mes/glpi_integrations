@@ -1,11 +1,15 @@
 package com.devgomes.glpi_integration.service;
 
 import com.devgomes.glpi_integration.client.GlpiApiClient;
+import com.devgomes.glpi_integration.client.GlpiApiException;
+import com.devgomes.glpi_integration.client.GlpiItemTypePath;
 import com.devgomes.glpi_integration.dto.ComputerListResponse;
 import com.devgomes.glpi_integration.dto.ComputerUpdateRequest;
 import com.devgomes.glpi_integration.dto.IdNameItem;
 import com.devgomes.glpi_integration.session.GlpiSessionManager;
+import com.devgomes.glpi_integration.sync.GlpiFieldFilter;
 import com.devgomes.glpi_integration.sync.SyncFieldResolver;
+import com.devgomes.glpi_integration.sync.SyncLookupIndexes;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -113,8 +117,181 @@ public class GlpiIntegrationService {
 
     /** Mapa nome do status (normalizado, sem acento) → id do State. */
     public Map<String, Integer> buildStateLabelIndex(String range) {
+        return buildLabelIndex(listStateIdAndNames(range));
+    }
+
+    public List<IdNameItem> listLocationIdAndNames(String range) {
+        return listGlpiItems("Location", range, false).items().stream()
+                .map(this::toIdNameItem)
+                .filter(item -> item != null)
+                .toList();
+    }
+
+    public List<IdNameItem> listGroupIdAndNames(String range) {
+        return listGlpiItems("Group", range, false).items().stream()
+                .map(this::toIdNameItem)
+                .filter(item -> item != null)
+                .toList();
+    }
+
+    public List<IdNameItem> listComputerTypeIdAndNames(String range) {
+        return listGlpiItems("ComputerType", range, false).items().stream()
+                .map(this::toIdNameItem)
+                .filter(item -> item != null)
+                .toList();
+    }
+
+    public List<IdNameItem> listManufacturerIdAndNames(String range) {
+        return listGlpiItems("Manufacturer", range, false).items().stream()
+                .map(this::toIdNameItem)
+                .filter(item -> item != null)
+                .toList();
+    }
+
+    public Map<String, Integer> buildLocationLabelIndex(String range) {
+        return buildLabelIndex(listLocationIdAndNames(range));
+    }
+
+    public Map<String, Integer> buildGroupLabelIndex(String range) {
+        return buildLabelIndex(listGroupIdAndNames(range));
+    }
+
+    public Map<String, Integer> buildComputerTypeLabelIndex(String range) {
+        return buildLabelIndex(listComputerTypeIdAndNames(range));
+    }
+
+    public Map<String, Integer> buildManufacturerLabelIndex(String range) {
+        return buildLabelIndex(listManufacturerIdAndNames(range));
+    }
+
+    public SyncLookupIndexes buildSyncLookupIndexes(String range) {
+        return new SyncLookupIndexes(
+                buildUserLoginIndex(range),
+                buildStateLabelIndex(range),
+                buildLocationLabelIndex(range),
+                buildGroupLabelIndex(range),
+                buildComputerTypeLabelIndex(range),
+                buildManufacturerLabelIndex(range)
+        );
+    }
+
+    public List<IdNameItem> listCustomAssetIdAndNames(String itemType, String range) {
+        return listGlpiItems(itemType, range, false).items().stream()
+                .map(this::toIdNameItem)
+                .filter(item -> item != null)
+                .toList();
+    }
+
+    /** Linhas brutas de um itemtype GLPI (ex. definições de ativo). */
+    public List<Map<String, Object>> listGlpiItemRows(String itemType, String range) {
+        return listGlpiItems(itemType, range, false).items();
+    }
+
+    public Map<String, Integer> buildFieldValueIndex(String itemType, String fieldName, String range) {
         Map<String, Integer> index = new HashMap<>();
-        for (IdNameItem item : listStateIdAndNames(range)) {
+        for (Map<String, Object> item : listGlpiItems(itemType, range, false).items()) {
+            Object id = item.get("id");
+            Object value = item.get(fieldName);
+            if (id == null || value == null) {
+                continue;
+            }
+            int parsedId = id instanceof Number number ? number.intValue() : Integer.parseInt(id.toString());
+            index.put(SyncFieldResolver.normalizeLabelKey(value.toString()), parsedId);
+        }
+        return index;
+    }
+
+    public Map<String, Object> getItem(String itemType, int itemId, boolean expandDropdowns) {
+        String mutationType = GlpiItemTypePath.mutationItemType(itemType);
+        log.info("Buscando {} id={} (mutation={})", itemType, itemId, mutationType);
+        String json = sessionManager.executeWithSession(token -> {
+            try {
+                return apiClient.getItem(token, mutationType, itemId, expandDropdowns);
+            } catch (GlpiApiException ex) {
+                if (!mutationType.equals(itemType) && isNotFound(ex)) {
+                    return apiClient.getItem(token, itemType, itemId, expandDropdowns);
+                }
+                throw ex;
+            }
+        });
+        return parseItemObject(json);
+    }
+
+    public void updateItem(String itemType, int itemId, Map<String, Object> fields) {
+        updateItem(itemType, itemId, fields, true);
+    }
+
+    public void updateItem(String itemType, int itemId, Map<String, Object> fields, boolean filterByExistingItem) {
+        if (fields.isEmpty()) {
+            throw new IllegalArgumentException("Nenhum campo informado para atualização de " + itemType + " " + itemId);
+        }
+        Map<String, Object> payload = fields;
+        if (filterByExistingItem) {
+            payload = filterPayloadAgainstGlpiItem(itemType, itemId, fields);
+            if (payload.isEmpty()) {
+                throw new IllegalArgumentException(
+                        "Nenhum campo reconhecido pelo GLPI para atualização de " + itemType + " " + itemId
+                                + ". Use GET /api/custom-assets/{key}/items/" + itemId + " para ver chaves válidas.");
+            }
+        }
+
+        String mutationType = GlpiItemTypePath.mutationItemType(itemType);
+        log.info("Atualizando {} id={} com {} campo(s) via PUT em {}",
+                itemType, itemId, payload.size(), mutationType);
+        Map<String, Object> finalPayload = payload;
+        sessionManager.runWithSession(token -> {
+            if (mutationType.equals(itemType)) {
+                apiClient.updateItem(token, itemType, itemId, finalPayload);
+                return;
+            }
+            try {
+                apiClient.updateItem(token, mutationType, itemId, finalPayload);
+            } catch (GlpiApiException first) {
+                if (isNotFound(first)) {
+                    log.warn("PUT em {} retornou 404, tentando {}", mutationType, itemType);
+                    apiClient.updateItem(token, itemType, itemId, finalPayload);
+                } else {
+                    throw first;
+                }
+            }
+        });
+    }
+
+    private Map<String, Object> filterPayloadAgainstGlpiItem(
+            String itemType,
+            int itemId,
+            Map<String, Object> fields) {
+        try {
+            Map<String, Object> existing = getItem(itemType, itemId, false);
+            GlpiFieldFilter.FilterResult filtered = GlpiFieldFilter.retainFieldsKnownToItem(fields, existing);
+            if (!filtered.droppedFieldNames().isEmpty()) {
+                log.warn("Campos ignorados no PUT id={} (não existem no GET GLPI): {}",
+                        itemId, filtered.droppedFieldNames());
+            }
+            return filtered.fields();
+        } catch (Exception ex) {
+            log.warn("Não foi possível filtrar campos via GET id={}: {}", itemId, ex.getMessage());
+            return fields;
+        }
+    }
+
+    private static boolean isNotFound(GlpiApiException ex) {
+        return ex.getStatusCode() != null && ex.getStatusCode().value() == 404;
+    }
+
+    public int createItem(String itemType, Map<String, Object> fields) {
+        if (fields.isEmpty()) {
+            throw new IllegalArgumentException("Nenhum campo informado para criação de " + itemType);
+        }
+        String mutationType = GlpiItemTypePath.mutationItemType(itemType);
+        log.info("Criando {} (mutation={}) com {} campo(s)", itemType, mutationType, fields.size());
+        return sessionManager.executeWithSession(token ->
+                apiClient.createItem(token, mutationType, fields));
+    }
+
+    private Map<String, Integer> buildLabelIndex(List<IdNameItem> items) {
+        Map<String, Integer> index = new HashMap<>();
+        for (IdNameItem item : items) {
             if (item.name() != null && !item.name().isBlank()) {
                 index.put(SyncFieldResolver.normalizeLabelKey(item.name()), item.id());
             }
@@ -180,13 +357,17 @@ public class GlpiIntegrationService {
     }
 
     private Map<String, Object> parseComputerObject(String json) {
+        return parseItemObject(json);
+    }
+
+    private Map<String, Object> parseItemObject(String json) {
         if (json == null || json.isBlank()) {
-            throw new IllegalStateException("Resposta vazia ao buscar Computer");
+            throw new IllegalStateException("Resposta vazia ao buscar item GLPI");
         }
         try {
             return objectMapper.readValue(json, new TypeReference<Map<String, Object>>() {});
         } catch (Exception ex) {
-            throw new IllegalStateException("Resposta inesperada ao buscar Computer: " + json, ex);
+            throw new IllegalStateException("Resposta inesperada ao buscar item GLPI: " + json, ex);
         }
     }
 }

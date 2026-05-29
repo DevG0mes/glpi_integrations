@@ -11,8 +11,31 @@ glpi:
   sync:
     enabled: false
     delay-ms: 500
+    lookup-range: 0-9999
     schedule-delay-ms: 3600000
     input-path: ${GLPI_SYNC_INPUT:}
+  custom-assets:
+    types:
+      starlink:
+        item-type: ${GLPI_ITEMTYPE_STARLINK:Glpi\\Asset\\AssetDefinition/Starlink}
+        natural-key-field: name
+      chip:
+        item-type: ${GLPI_ITEMTYPE_CHIP:Glpi\\Asset\\AssetDefinition/Chip}
+        natural-key-field: custom_iccid
+      celular:
+        item-type: ${GLPI_ITEMTYPE_CELULAR:Glpi\\Asset\\AssetDefinition/Celular}
+        natural-key-field: custom_imei
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: method
+    display-request-duration: true
+  show-actuator: false
 
 management:
   endpoints:

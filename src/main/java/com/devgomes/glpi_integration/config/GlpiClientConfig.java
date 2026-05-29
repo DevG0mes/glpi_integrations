@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestClient;
 
 @Configuration
-@EnableConfigurationProperties({GlpiProperties.class, GlpiSyncProperties.class})
+@EnableConfigurationProperties({GlpiProperties.class, GlpiSyncProperties.class, GlpiCustomAssetsProperties.class})
 public class GlpiClientConfig {
 
     @Bean

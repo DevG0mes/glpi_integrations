@@ -15,7 +15,16 @@ public record AssetUpdateRow(
         Integer computermodelsId,
         String serial,
         String otherserial,
-        String comment
+        String comment,
+        Integer groupsId,
+        String groupLabel,
+        Integer locationsId,
+        String locationLabel,
+        Integer computertypesId,
+        String computerTypeLabel,
+        Integer manufacturersId,
+        String manufacturerLabel,
+        String displayName
 ) {
 
     public boolean usesNameLookup() {

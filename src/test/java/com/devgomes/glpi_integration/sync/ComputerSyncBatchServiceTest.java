@@ -42,18 +42,20 @@ class ComputerSyncBatchServiceTest {
     @Test
     void processRows_continuesOnFailureAndBuildsReport() {
         var rows = List.of(
-                new AssetUpdateRow(2, 10, null, null, null, null, null, 11, "SN-1", null, null),
-                new AssetUpdateRow(3, 11, null, null, null, null, null, 12, "SN-2", null, null)
+                new AssetUpdateRow(2, 10, null, null, null, null, null, 11, "SN-1", null, null,
+                        null, null, null, null, null, null, null, null, null),
+                new AssetUpdateRow(3, 11, null, null, null, null, null, 12, "SN-2", null, null,
+                        null, null, null, null, null, null, null, null, null)
         );
 
+        when(glpiIntegrationService.initSession()).thenReturn("sess");
+        when(glpiIntegrationService.buildSyncLookupIndexes(any())).thenReturn(SyncLookupIndexes.empty());
         when(glpiIntegrationService.buildComputerNameIndex(any())).thenReturn(Map.of());
-        when(glpiIntegrationService.buildUserLoginIndex(any())).thenReturn(Map.of());
-        when(glpiIntegrationService.buildStateLabelIndex(any())).thenReturn(Map.of());
 
         doThrow(new GlpiApiException(HttpStatus.BAD_REQUEST, "erro linha 2"))
                 .when(glpiIntegrationService).updateComputer(eq(10), any(ComputerUpdateRequest.class));
 
-        SyncReport report = batchService.processRows("test.csv", rows);
+        SyncReport report = batchService.processRows("test.csv", rows, false);
 
         assertThat(report.total()).isEqualTo(2);
         assertThat(report.successCount()).isEqualTo(1);

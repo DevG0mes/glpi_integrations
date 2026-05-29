@@ -126,6 +126,24 @@ public class AssetSpreadsheetReader {
         if (normalized.equals("glpi_id")) {
             putAlias(index, "glpi_id", column);
         }
+        if (normalized.equals("local") || normalized.equals("localidade") || normalized.contains("localizacao")) {
+            putAlias(index, "locations_id", column);
+        }
+        if (normalized.equals("grupo") || normalized.equals("groups_id")) {
+            putAlias(index, "groups_id", column);
+        }
+        if (normalized.equals("tipo") || normalized.equals("computertypes_id")) {
+            putAlias(index, "computertypes_id", column);
+        }
+        if (normalized.equals("fabricante") || normalized.equals("manufacturers_id")) {
+            putAlias(index, "manufacturers_id", column);
+        }
+        if (normalized.equals("nome") || normalized.equals("display_name")) {
+            putAlias(index, "display_name", column);
+        }
+        if (normalized.equals("observacao") || normalized.equals("comment")) {
+            putAlias(index, "comment", column);
+        }
     }
 
     private static boolean isAssetIdColumn(String normalized) {
@@ -167,6 +185,10 @@ public class AssetSpreadsheetReader {
 
         var responsavel = parseResponsavel(row, headerIndex);
         var status = parseStatus(row, headerIndex);
+        var grupo = parseLookupField(row, headerIndex, "groups_id");
+        var local = parseLookupField(row, headerIndex, "locations_id");
+        var tipo = parseLookupField(row, headerIndex, "computertypes_id");
+        var fabricante = parseLookupField(row, headerIndex, "manufacturers_id");
 
         return new AssetUpdateRow(
                 lineNumber,
@@ -179,8 +201,31 @@ public class AssetSpreadsheetReader {
                 parseOptionalInt(row, headerIndex, "computermodels_id"),
                 parseOptionalString(row, headerIndex, "serial"),
                 parseOptionalString(row, headerIndex, "otherserial"),
-                parseOptionalString(row, headerIndex, "comment")
+                parseOptionalString(row, headerIndex, "comment"),
+                grupo.id(),
+                grupo.label(),
+                local.id(),
+                local.label(),
+                tipo.id(),
+                tipo.label(),
+                fabricante.id(),
+                fabricante.label(),
+                parseOptionalString(row, headerIndex, "display_name")
         );
+    }
+
+    private static LookupField parseLookupField(String[] row, Map<String, Integer> headerIndex, String column) {
+        String raw = parseOptionalString(row, headerIndex, column);
+        if (raw == null) {
+            return new LookupField(null, null);
+        }
+        if (SyncFieldResolver.isNumeric(raw)) {
+            return new LookupField(Integer.parseInt(raw.trim()), null);
+        }
+        return new LookupField(null, raw.trim());
+    }
+
+    private record LookupField(Integer id, String label) {
     }
 
     private static ResponsavelFields parseResponsavel(String[] row, Map<String, Integer> headerIndex) {

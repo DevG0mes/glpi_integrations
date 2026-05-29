@@ -1,10 +1,19 @@
-# Copie para application-local.properties (gitignored) e preencha com seus valores.
+# OBRIGATÓRIO: copie este arquivo para application-local.properties (mesma pasta).
+# Sem isso a app usa http://localhost/apirest.php e /discover falha com ConnectException.
+
 glpi.test-on-startup=true
 glpi.api.style=LEGACY_APIREST
-# Ex.: http://192.168.1.98/apirest.php
-glpi.api.base-url=http://SEU_SERVIDOR_GLPI/apirest.php
+# Use o IP/host REAL do seu GLPI (não deixe localhost se o GLPI está em outro servidor):
+glpi.api.base-url=http://192.168.1.98/apirest.php
 glpi.api.app-token=SEU_APP_TOKEN
 glpi.api.user-token=SEU_USER_TOKEN
 server.port=8081
 # glpi.sync.enabled=false
 # glpi.sync.input-path=C:\\caminho\\ativos.csv
+
+# GLPI 11 — itemtype das definições de ativo (classe PHP; use \\ no .properties)
+# Descubra em GET /api/custom-assets/{starlink|chip|celular}/probe após configurar
+# GLPI 11 — use o nome do sistema exato (GET /api/custom-assets/definitions):
+# GLPI_ITEMTYPE_STARLINK=Glpi\\Asset\\AssetDefinition/Starlink
+# GLPI_ITEMTYPE_CHIP=Glpi\\Asset\\AssetDefinition/Chip
+# GLPI_ITEMTYPE_CELULAR=Glpi\\Asset\\AssetDefinition/Celular

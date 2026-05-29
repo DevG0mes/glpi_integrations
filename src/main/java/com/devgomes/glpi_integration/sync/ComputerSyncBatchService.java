@@ -2,6 +2,7 @@ package com.devgomes.glpi_integration.sync;
 
 import com.devgomes.glpi_integration.client.GlpiApiException;
 import com.devgomes.glpi_integration.config.GlpiSyncProperties;
+import com.devgomes.glpi_integration.dto.ComputerUpdateRequest;
 import com.devgomes.glpi_integration.service.GlpiIntegrationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,12 @@ public class ComputerSyncBatchService {
 
     public SyncReport syncFromFile(Path file) throws IOException {
         List<AssetUpdateRow> rows = spreadsheetReader.read(file);
-        return processRows(file.toString(), rows);
+        return processRows(file.toString(), rows, false);
+    }
+
+    public SyncReport validateFromFile(Path file) throws IOException {
+        List<AssetUpdateRow> rows = spreadsheetReader.read(file);
+        return processRows(file.toString(), rows, true);
     }
 
     public SyncReport syncFromConfiguredPath() throws IOException {
@@ -44,13 +50,19 @@ public class ComputerSyncBatchService {
     }
 
     public SyncReport processRows(String source, List<AssetUpdateRow> rows) {
-        log.info("Iniciando sincronização de {} linhas a partir de {}", rows.size(), source);
+        return processRows(source, rows, false);
+    }
+
+    public SyncReport processRows(String source, List<AssetUpdateRow> rows, boolean dryRun) {
+        log.info("{} {} linhas a partir de {}",
+                dryRun ? "Validando" : "Iniciando sincronização de",
+                rows.size(),
+                source);
         glpiIntegrationService.initSession();
 
         String range = syncProperties.getLookupRange();
+        SyncLookupIndexes indexes = glpiIntegrationService.buildSyncLookupIndexes(range);
         Map<String, Integer> computersByName = glpiIntegrationService.buildComputerNameIndex(range);
-        Map<String, Integer> usersByLogin = glpiIntegrationService.buildUserLoginIndex(range);
-        Map<String, Integer> statesByLabel = glpiIntegrationService.buildStateLabelIndex(range);
 
         List<SyncLineResult> results = new ArrayList<>();
         int success = 0;
@@ -59,15 +71,19 @@ public class ComputerSyncBatchService {
         for (AssetUpdateRow row : rows) {
             try {
                 int computerId = resolveComputerId(row, computersByName);
-                var request = SyncFieldResolver.toUpdateRequest(row, usersByLogin, statesByLabel);
+                ComputerUpdateRequest request = SyncFieldResolver.toUpdateRequest(row, indexes);
                 if (request.toInputMap().isEmpty()) {
                     throw new IllegalArgumentException(
                             "Linha " + row.lineNumber() + ": nenhum campo para atualizar (informe id_model)");
                 }
-                glpiIntegrationService.updateComputer(computerId, request);
-                results.add(new SyncLineResult(row.lineNumber(), computerId, true, "OK"));
+                if (dryRun) {
+                    results.add(new SyncLineResult(row.lineNumber(), computerId, true,
+                            "would_update: " + request.toInputMap()));
+                } else {
+                    glpiIntegrationService.updateComputer(computerId, request);
+                    results.add(new SyncLineResult(row.lineNumber(), computerId, true, "OK"));
+                }
                 success++;
-                log.debug("Linha {}: Computer {} atualizado", row.lineNumber(), computerId);
             } catch (GlpiApiException ex) {
                 String message = "GLPI " + ex.getStatusCode().value() + ": " + ex.getMessage();
                 results.add(new SyncLineResult(row.lineNumber(), row.glpiId(), false, message));
@@ -81,7 +97,8 @@ public class ComputerSyncBatchService {
             throttle();
         }
 
-        log.info("Sincronização concluída: {} sucesso, {} falha(s), total {}", success, failure, rows.size());
+        log.info("{} concluída: {} sucesso, {} falha(s), total {}",
+                dryRun ? "Validação" : "Sincronização", success, failure, rows.size());
         return new SyncReport(source, rows.size(), success, failure, results);
     }
 

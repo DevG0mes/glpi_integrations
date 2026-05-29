@@ -4,6 +4,7 @@ import com.devgomes.glpi_integration.dto.ComputerListResponse;
 import com.devgomes.glpi_integration.dto.ComputerUpdateRequest;
 import com.devgomes.glpi_integration.dto.IdNameItem;
 import com.devgomes.glpi_integration.service.GlpiIntegrationService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+@Tag(name = "Computer", description = "Equipamento nativo GLPI")
 @RestController
 @RequestMapping("/api/computers")
 public class ComputerController {

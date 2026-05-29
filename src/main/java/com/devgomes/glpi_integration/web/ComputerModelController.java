@@ -3,6 +3,7 @@ package com.devgomes.glpi_integration.web;
 import com.devgomes.glpi_integration.dto.ComputerListResponse;
 import com.devgomes.glpi_integration.dto.IdNameItem;
 import com.devgomes.glpi_integration.service.GlpiIntegrationService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+@Tag(name = "Computer — modelos", description = "Modelos de computer no GLPI")
 @RestController
 @RequestMapping("/api/computer-models")
 public class ComputerModelController {

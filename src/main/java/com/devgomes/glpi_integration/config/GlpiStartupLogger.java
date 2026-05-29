@@ -24,5 +24,9 @@ public class GlpiStartupLogger implements ApplicationRunner {
                 properties.getStyle(),
                 resolved,
                 properties.hasCredentials() ? "presentes" : "ausentes");
+        if (resolved.contains("://localhost") || resolved.contains("://127.0.0.1")) {
+            log.warn("GLPI apontando para localhost — se o servidor for remoto, crie application-local.properties "
+                    + "com glpi.api.base-url=http://SEU_IP/apirest.php");
+        }
     }
 }
