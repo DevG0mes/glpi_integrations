@@ -23,7 +23,9 @@ Com a aplicação rodando (porta **8081** por padrão):
 | **Detalhe do item** | JSON completo de um ativo customizado por id |
 | **Documentação** | Referência da API (rotas, autenticação, exemplos curl) |
 
-O link antigo **Swagger** no rodapé foi substituído por esta aba. Em produção o Swagger fica **desligado** por padrão (`application-prod.yml`). Para habilitar: `GLPI_ENABLE_SWAGGER=true` no `.env` (também exige `X-API-Key`).
+O link antigo **Swagger** no rodapé foi substituído por esta aba. Em produção o Swagger fica **desligado** por padrão (`application-prod.yml`). Para habilitar: `GLPI_ENABLE_SWAGGER=true` no `.env`.
+
+Com Swagger ativo: a página `/swagger-ui.html` abre sem chave; em **Authorize** informe `X-API-Key` (mesma do `.env`) para testar rotas `/api/**`.
 
 ## Modelos de planilha
 

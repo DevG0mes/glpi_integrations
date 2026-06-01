@@ -159,6 +159,7 @@ const ApiDocs = (() => {
     if (openApiOk) {
       swaggerBox += `
         <p>OpenAPI disponível neste ambiente:</p>
+        <p class="hint">No Swagger: clique em <strong>Authorize</strong> e informe a mesma <code>GLPI_API_KEY</code> do servidor (header X-API-Key).</p>
         <div class="actions-bar">
           <a class="btn btn-primary" href="/swagger-ui.html" target="_blank" rel="noopener">Abrir Swagger UI</a>
           <a class="btn btn-secondary" href="/v3/api-docs" target="_blank" rel="noopener">JSON OpenAPI</a>

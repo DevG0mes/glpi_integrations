@@ -37,6 +37,7 @@ springdoc:
     tags-sorter: alpha
     operations-sorter: method
     display-request-duration: true
+    persist-authorization: true
   show-actuator: false
 
 management:

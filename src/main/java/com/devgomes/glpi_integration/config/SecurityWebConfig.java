@@ -23,7 +23,9 @@ public class SecurityWebConfig {
             GlpiSecurityProperties securityProperties) {
         FilterRegistrationBean<ApiKeyAuthenticationFilter> bean = new FilterRegistrationBean<>();
         bean.setFilter(new ApiKeyAuthenticationFilter(securityProperties));
-        bean.addUrlPatterns("/api/*", "/v3/api-docs", "/v3/api-docs/*", "/swagger-ui", "/swagger-ui/*");
+        // Apenas /api/** — Swagger UI e OpenAPI JSON ficam públicos quando habilitados;
+        // o "Try it out" do Swagger envia X-API-Key nas rotas /api (configurado em OpenApiConfig).
+        bean.addUrlPatterns("/api/*");
         bean.setOrder(2);
         return bean;
     }
