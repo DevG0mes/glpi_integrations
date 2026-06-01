@@ -78,6 +78,12 @@ GLPI_ITEMTYPE_CELULAR=Glpi\Asset\AssetDefinition/Celular
 # Interface web: http://IP_DO_SERVIDOR:8081/
 ```
 
+Com `GLPI_API_KEY` definida, o `verify.sh` lê a chave do `.env` automaticamente. Para `curl` manual:
+
+```bash
+curl -H "X-API-Key: SUA_CHAVE" http://localhost:8081/api/glpi/connection-info
+```
+
 ### Comandos úteis
 
 ```bash

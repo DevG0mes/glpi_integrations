@@ -73,6 +73,7 @@
       inventory: "Inventário",
       lookups: "Consultas auxiliares",
       item: "Detalhe do item",
+      docs: "Documentação da API",
     };
     $("#page-title").textContent = titles[viewId] || viewId;
     setActiveNav(viewId);
@@ -488,7 +489,7 @@
           </div>
           <button type="button" class="btn btn-primary" id="btn-load-item">Carregar</button>
         </div>
-        <p class="hint">Computers: use a aba Inventário ou Swagger <code>GET /api/computers/{id}</code>.</p>
+        <p class="hint">Computers: use a aba Inventário ou <code>GET /api/computers/{id}</code> (ver Documentação).</p>
         <div id="item-result"></div>
       </div>
     `;
@@ -540,6 +541,10 @@
         break;
       case "item":
         renderItemView();
+        break;
+      case "docs":
+        $("#view-docs").innerHTML = "<p class=\"hint\">Carregando documentação…</p>";
+        await ApiDocs.render($("#view-docs"));
         break;
       default:
         showView("dashboard");

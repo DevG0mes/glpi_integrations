@@ -22,9 +22,10 @@
         <a href="#inventory" data-route="inventory" class="nav-link">Inventário</a>
         <a href="#lookups" data-route="lookups" class="nav-link">Consultas auxiliares</a>
         <a href="#item" data-route="item" class="nav-link">Detalhe do item</a>
+        <a href="#docs" data-route="docs" class="nav-link">Documentação</a>
       </nav>
       <div class="sidebar-footer">
-        <a href="/swagger-ui.html" target="_blank" rel="noopener">Swagger API</a>
+        <a href="#docs">API — referência</a>
         <a href="/actuator/health" target="_blank" rel="noopener">Health</a>
       </div>
     </aside>
@@ -45,6 +46,7 @@
       <div id="view-inventory" class="view" hidden></div>
       <div id="view-lookups" class="view" hidden></div>
       <div id="view-item" class="view" hidden></div>
+      <div id="view-docs" class="view" hidden></div>
     </main>
   </div>
 
@@ -67,6 +69,7 @@
   </dialog>
 
   <script src="/app/js/api.js"></script>
+  <script src="/app/js/docs.js"></script>
   <script src="/app/js/app.js"></script>
 </body>
 </html>

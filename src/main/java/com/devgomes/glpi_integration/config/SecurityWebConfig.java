@@ -23,7 +23,7 @@ public class SecurityWebConfig {
             GlpiSecurityProperties securityProperties) {
         FilterRegistrationBean<ApiKeyAuthenticationFilter> bean = new FilterRegistrationBean<>();
         bean.setFilter(new ApiKeyAuthenticationFilter(securityProperties));
-        bean.addUrlPatterns("/api/*");
+        bean.addUrlPatterns("/api/*", "/v3/api-docs", "/v3/api-docs/*", "/swagger-ui", "/swagger-ui/*");
         bean.setOrder(2);
         return bean;
     }

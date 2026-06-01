@@ -11,6 +11,7 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
       GLPI_API_KEY: ${GLPI_API_KEY:-}
+      GLPI_ENABLE_SWAGGER: ${GLPI_ENABLE_SWAGGER:-false}
       GLPI_API_STYLE: ${GLPI_API_STYLE:-LEGACY_APIREST}
       GLPI_API_BASE_URL: ${GLPI_API_BASE_URL:-http://host.docker.internal/glpi/apirest.php}
       GLPI_APP_TOKEN: ${GLPI_APP_TOKEN:-}

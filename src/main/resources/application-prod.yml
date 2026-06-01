@@ -1,9 +1,10 @@
 # Perfil produção (Ubuntu / Docker): SPRING_PROFILES_ACTIVE=prod
+# Swagger desligado por padrão; opcional: GLPI_ENABLE_SWAGGER=true (exige X-API-Key)
 springdoc:
   api-docs:
-    enabled: false
+    enabled: ${GLPI_ENABLE_SWAGGER:false}
   swagger-ui:
-    enabled: false
+    enabled: ${GLPI_ENABLE_SWAGGER:false}
 
 management:
   endpoints:

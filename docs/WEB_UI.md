@@ -21,6 +21,9 @@ Com a aplicação rodando (porta **8081** por padrão):
 | **Inventário** | Listas id + nome (até 500 itens por tipo), com filtro local |
 | **Consultas auxiliares** | Usuários, status, localidades, etc. — exportar CSV |
 | **Detalhe do item** | JSON completo de um ativo customizado por id |
+| **Documentação** | Referência da API (rotas, autenticação, exemplos curl) |
+
+O link antigo **Swagger** no rodapé foi substituído por esta aba. Em produção o Swagger fica **desligado** por padrão (`application-prod.yml`). Para habilitar: `GLPI_ENABLE_SWAGGER=true` no `.env` (também exige `X-API-Key`).
 
 ## Modelos de planilha
 
