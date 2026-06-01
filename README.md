@@ -53,10 +53,35 @@ Planilhas em `./data` (montado read-only). Sync:
 curl.exe -X POST http://localhost:8081/api/sync/computers -F "file=@data/computers.csv"
 ```
 
+## Deploy Ubuntu (servidor)
+
+Guia completo: **[docs/DEPLOY_UBUNTU.md](docs/DEPLOY_UBUNTU.md)**
+
+```bash
+chmod +x deploy/ubuntu/*.sh
+sudo ./deploy/ubuntu/install-docker.sh   # primeira vez
+cp .env.example .env && nano .env
+./deploy/ubuntu/deploy-docker.sh
+./deploy/ubuntu/verify.sh
+```
+
+Interface: `http://IP_DO_SERVIDOR:8081/`
+
+## Interface web
+
+Painel operacional no navegador (upload de planilhas, inventário, consultas):
+
+```text
+http://localhost:8081/
+```
+
+Detalhes: [docs/WEB_UI.md](docs/WEB_UI.md)
+
 ## API
 
 | Recurso | Uso |
 |---------|-----|
+| [docs/WEB_UI.md](docs/WEB_UI.md) | **Interface web** para operação no dia a dia |
 | [docs/API_REFERENCE.md](docs/API_REFERENCE.md) | Todas as rotas em português (por ativo e método HTTP) |
 | [docs/SWAGGER_APIDOG.md](docs/SWAGGER_APIDOG.md) | **Swagger UI + Apidog** — como começar |
 | http://localhost:8081/swagger-ui.html | Testar API no navegador (com a app rodando) |
@@ -86,3 +111,4 @@ Detalhes de colunas, criar vs atualizar e permissões GLPI: [docs/CUSTOM_ASSETS.
 - [docs/CUSTOM_ASSETS.md](docs/CUSTOM_ASSETS.md) — Starlink, Chip, Celular (campos e permissões)
 - [docs/API_VALIDATION.md](docs/API_VALIDATION.md) — testar API GLPI com curl
 - [docs/SECURITY.md](docs/SECURITY.md) — tokens e senhas
+- [docs/DEPLOY_UBUNTU.md](docs/DEPLOY_UBUNTU.md) — deploy em servidor Ubuntu (Docker / systemd)

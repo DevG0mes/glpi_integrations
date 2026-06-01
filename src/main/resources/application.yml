@@ -2,6 +2,8 @@ glpi:
   test-on-startup: false
   health:
     enabled: true
+  security:
+    api-key: ${GLPI_API_KEY:}
   api:
     # LEGACY_APIREST (apirest.php) ou LEGACY_VIA_ROUTER (api.php/v1). Ver docs/API_VALIDATION.md
     style: ${GLPI_API_STYLE:LEGACY_APIREST}
@@ -51,3 +53,7 @@ spring:
     name: glpi-integration
   config:
     import: optional:classpath:application-local.properties
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 12MB

@@ -1,0 +1,28 @@
+[Unit]
+Description=GLPI Integration Middleware (Spring Boot)
+Documentation=https://github.com/DevG0mes/glpi_integrations
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=glpi-integration
+Group=glpi-integration
+WorkingDirectory=/opt/glpi-integration
+EnvironmentFile=-/etc/glpi-integration/env
+ExecStart=/usr/bin/java $JAVA_TOOL_OPTIONS -jar /opt/glpi-integration/app.jar
+Restart=on-failure
+RestartSec=10
+SuccessExitStatus=143
+
+# Logs
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=glpi-integration
+
+# Segurança básica
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

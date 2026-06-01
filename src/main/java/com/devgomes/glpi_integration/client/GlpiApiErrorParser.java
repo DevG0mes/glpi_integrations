@@ -27,8 +27,8 @@ public final class GlpiApiErrorParser {
         try {
             JsonNode node = MAPPER.readTree(trimmed);
             if (node.isArray() && node.size() >= 2) {
-                String code = node.get(0).asText("");
-                String detail = node.get(1).isNull() ? "" : node.get(1).asText("");
+                String code = node.get(0).asString("");
+                String detail = node.get(1).isNull() ? "" : node.get(1).asString("");
                 if (!detail.isBlank()) {
                     return code + ": " + detail;
                 }

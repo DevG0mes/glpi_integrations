@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GLPI Integration — PSI Energy</title>
+  <link rel="stylesheet" href="/app/css/app.css">
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar" aria-label="Menu principal">
+      <div class="brand">
+        <span class="brand-mark">G</span>
+        <div>
+          <strong>GLPI Integration</strong>
+          <small>Middleware PSI Energy</small>
+        </div>
+      </div>
+      <nav class="nav" id="main-nav">
+        <a href="#dashboard" data-route="dashboard" class="nav-link active">Painel</a>
+        <a href="#sync" data-route="sync" class="nav-link">Sincronizar</a>
+        <a href="#inventory" data-route="inventory" class="nav-link">Inventário</a>
+        <a href="#lookups" data-route="lookups" class="nav-link">Consultas auxiliares</a>
+        <a href="#item" data-route="item" class="nav-link">Detalhe do item</a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="/swagger-ui.html" target="_blank" rel="noopener">Swagger API</a>
+        <a href="/actuator/health" target="_blank" rel="noopener">Health</a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <h1 id="page-title">Painel</h1>
+        <div class="topbar-actions">
+          <span id="api-status" class="badge badge-muted">Verificando…</span>
+          <span id="api-key-badge" class="badge badge-muted" hidden>API key</span>
+          <button type="button" class="btn btn-ghost" id="btn-api-key" title="Chave de API (produção)">Chave API</button>
+          <button type="button" class="btn btn-ghost" id="btn-refresh" title="Atualizar painel">Atualizar</button>
+        </div>
+      </header>
+
+      <div id="view-dashboard" class="view" hidden></div>
+      <div id="view-sync" class="view" hidden></div>
+      <div id="view-inventory" class="view" hidden></div>
+      <div id="view-lookups" class="view" hidden></div>
+      <div id="view-item" class="view" hidden></div>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <dialog id="api-key-dialog" class="dialog">
+    <form method="dialog" class="dialog-form">
+      <h2>Chave de API</h2>
+      <p class="hint">Em produção, use a mesma chave definida em <code>GLPI_API_KEY</code> no servidor. Fica só neste navegador (sessionStorage).</p>
+      <div class="field">
+        <label for="api-key-input">X-API-Key</label>
+        <input type="password" id="api-key-input" autocomplete="off" placeholder="cole a chave">
+      </div>
+      <div class="actions-bar">
+        <button type="submit" class="btn btn-primary" value="save">Salvar</button>
+        <button type="button" class="btn btn-secondary" id="btn-clear-api-key">Limpar</button>
+        <button type="button" class="btn btn-ghost" id="btn-close-api-key">Fechar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="/app/js/api.js"></script>
+  <script src="/app/js/app.js"></script>
+</body>
+</html>

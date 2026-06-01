@@ -54,7 +54,7 @@ class GlpiApiClientTest {
 
     @Test
     void listComputers_returnsJsonArray() {
-        mockServer.expect(requestTo("http://glpi.test/apirest.php/Computer/?range=0-2"))
+        mockServer.expect(requestTo("http://glpi.test/apirest.php/Computer?range=0-2"))
                 .andExpect(method(GET))
                 .andExpect(header("Session-Token", "sess-xyz"))
                 .andRespond(withSuccess("[{\"id\":1,\"name\":\"pc-1\"}]", MediaType.APPLICATION_JSON)

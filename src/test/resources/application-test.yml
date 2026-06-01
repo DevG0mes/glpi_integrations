@@ -1,8 +1,10 @@
-glpi:
-  test-on-startup: false
-  health:
+# Perfil de testes — Swagger desligado, sem exigir API key
+springdoc:
+  api-docs:
     enabled: false
-  api:
-    base-url: http://localhost/glpi/apirest.php
-    app-token: test-app
-    user-token: test-user
+  swagger-ui:
+    enabled: false
+
+glpi:
+  security:
+    api-key: ""
