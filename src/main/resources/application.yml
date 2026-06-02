@@ -27,6 +27,9 @@ glpi:
       celular:
         item-type: ${GLPI_ITEMTYPE_CELULAR:Glpi\\Asset\\AssetDefinition/Celular}
         natural-key-field: custom_imei
+      colaborador:
+        item-type: ${GLPI_ITEMTYPE_COLABORADOR:Glpi\\Asset\\AssetDefinition/Colaborador}
+        natural-key-field: custom_email
 
 springdoc:
   api-docs:

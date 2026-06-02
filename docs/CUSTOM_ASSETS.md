@@ -47,6 +47,18 @@ Chave natural recomendada: campo `name` (ex. `STARLINK-{projeto}-{local}`).
 | modelo | Texto |
 | users_id | Usuário |
 
+### Colaborador
+
+| Campo | Tipo |
+|-------|------|
+| Nome | Texto (`name`) |
+| Departamento | Texto |
+| Email | Texto (chave natural) |
+| Ativo | Texto |
+
+**API dedicada:** `GET/POST /api/colaboradores`, `PUT /api/colaboradores/{id}`  
+**Sync planilha:** `POST /api/sync/colaborador` (colunas: `nome`, `email`, `departamento`, `ativo`)
+
 ## Conferência com os formulários GLPI (campos criados)
 
 Os rótulos na tela batem com o middleware:
@@ -62,6 +74,9 @@ Os rótulos na tela batem com o middleware:
 | Localização (texto) | `custom_localizacao` | `localidade` ou `localizacao` |
 | iccid / numero / Status | `custom_iccid`, `custom_numero`, `states_id` | Chip |
 | imei / modelo | `custom_imei`, `custom_modelo` | Celular |
+| Departamento / Email / Ativo | `custom_departamento`, `custom_email`, `custom_ativo` | Colaborador |
+
+Se o PUT falhar, use `GET /api/custom-assets/colaborador/items/{id}` e confira `customFieldKeys` — ajuste o mapeamento em `GlpiCustomAssetsProperties` se os nomes no GLPI forem diferentes.
 
 ## Passo 2 — Descobrir o `itemtype` na API
 

@@ -18,12 +18,15 @@ public class CustomAssetItemTypeDiscoveryService {
 
     private final GlpiIntegrationService glpiIntegrationService;
     private final GlpiAssetDefinitionCatalog definitionCatalog;
+    private final com.devgomes.glpi_integration.sync.AssetTypeRegistry assetTypeRegistry;
 
     public CustomAssetItemTypeDiscoveryService(
             GlpiIntegrationService glpiIntegrationService,
-            GlpiAssetDefinitionCatalog definitionCatalog) {
+            GlpiAssetDefinitionCatalog definitionCatalog,
+            com.devgomes.glpi_integration.sync.AssetTypeRegistry assetTypeRegistry) {
         this.glpiIntegrationService = glpiIntegrationService;
         this.definitionCatalog = definitionCatalog;
+        this.assetTypeRegistry = assetTypeRegistry;
     }
 
     public Map<String, Object> discoverAll() {
@@ -31,7 +34,7 @@ public class CustomAssetItemTypeDiscoveryService {
         var fetchResult = definitionCatalog.fetchDefinitionsWithDiagnostics();
         List<Map<String, Object>> definitions = fetchResult.definitions();
         Map<String, Object> result = new LinkedHashMap<>();
-        for (String key : List.of("starlink", "chip", "celular")) {
+        for (String key : assetTypeRegistry.keys()) {
             result.put(key, discoverOne(key, false, definitions));
         }
         Map<String, Object> response = new LinkedHashMap<>();
@@ -179,6 +182,7 @@ public class CustomAssetItemTypeDiscoveryService {
             case "starlink" -> "Starlink";
             case "chip" -> "Chip";
             case "celular" -> "Celular";
+            case "colaborador" -> "Colaborador";
             default -> assetKey;
         };
     }
@@ -197,6 +201,7 @@ public class CustomAssetItemTypeDiscoveryService {
         putPropertyLine(lines, "GLPI_ITEMTYPE_STARLINK", assetMap.get("starlink"));
         putPropertyLine(lines, "GLPI_ITEMTYPE_CHIP", assetMap.get("chip"));
         putPropertyLine(lines, "GLPI_ITEMTYPE_CELULAR", assetMap.get("celular"));
+        putPropertyLine(lines, "GLPI_ITEMTYPE_COLABORADOR", assetMap.get("colaborador"));
         return lines;
     }
 

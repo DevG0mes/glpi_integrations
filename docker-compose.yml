@@ -19,6 +19,7 @@ services:
       GLPI_ITEMTYPE_STARLINK: ${GLPI_ITEMTYPE_STARLINK:-Glpi\\Asset\\AssetDefinition/Starlink}
       GLPI_ITEMTYPE_CHIP: ${GLPI_ITEMTYPE_CHIP:-Glpi\\Asset\\AssetDefinition/Chip}
       GLPI_ITEMTYPE_CELULAR: ${GLPI_ITEMTYPE_CELULAR:-Glpi\\Asset\\AssetDefinition/Celular}
+      GLPI_ITEMTYPE_COLABORADOR: ${GLPI_ITEMTYPE_COLABORADOR:-Glpi\\Asset\\AssetDefinition/Colaborador}
       GLPI_SYNC_INPUT: ${GLPI_SYNC_INPUT:-}
       JAVA_TOOL_OPTIONS: ${JAVA_TOOL_OPTIONS:--XX:MaxRAMPercentage=75.0}
     volumes:

@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Definições dos ativos customizados GLPI 11 (Starlink, Chip, Celular).
+ * Definições dos ativos customizados GLPI 11 (Starlink, Chip, Celular, Colaborador).
  * Ajuste {@code item-type} após criar as definições no GLPI — ver docs/CUSTOM_ASSETS.md.
  */
 @ConfigurationProperties(prefix = "glpi.custom-assets")
@@ -49,6 +49,7 @@ public class GlpiCustomAssetsProperties {
         map.put("starlink", starlinkDefaults());
         map.put("chip", chipDefaults());
         map.put("celular", celularDefaults());
+        map.put("colaborador", colaboradorDefaults());
         return map;
     }
 
@@ -100,6 +101,21 @@ public class GlpiCustomAssetsProperties {
                         Map.entry("modelo", new FieldMapping("custom_modelo", FieldResolverType.DIRECT)),
                         Map.entry("responsavel", new FieldMapping("users_id", FieldResolverType.USER_LOGIN)),
                         Map.entry("usuario", new FieldMapping("users_id", FieldResolverType.USER_LOGIN))
+                )
+        );
+    }
+
+    private static CustomAssetDefinition colaboradorDefaults() {
+        return new CustomAssetDefinition(
+                "Glpi\\Asset\\AssetDefinition/Colaborador",
+                "custom_email",
+                List.of(),
+                Map.ofEntries(
+                        Map.entry("nome", new FieldMapping("name", FieldResolverType.DIRECT)),
+                        Map.entry("name", new FieldMapping("name", FieldResolverType.DIRECT)),
+                        Map.entry("email", new FieldMapping("custom_email", FieldResolverType.NATURAL_KEY)),
+                        Map.entry("departamento", new FieldMapping("custom_departamento", FieldResolverType.DIRECT)),
+                        Map.entry("ativo", new FieldMapping("custom_ativo", FieldResolverType.DIRECT))
                 )
         );
     }

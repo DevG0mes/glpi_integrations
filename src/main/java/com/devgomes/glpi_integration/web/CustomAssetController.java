@@ -13,9 +13,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
+import com.devgomes.glpi_integration.service.CustomAssetItemWriteService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,7 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-@Tag(name = "Ativos customizados", description = "Starlink, Chip, Celular. assetKey: starlink | chip | celular")
+@Tag(name = "Ativos customizados", description = "Starlink, Chip, Celular, Colaborador. assetKey: starlink | chip | celular | colaborador")
 @RestController
 @RequestMapping("/api/custom-assets")
 public class CustomAssetController {
@@ -36,18 +38,21 @@ public class CustomAssetController {
     private final CustomAssetItemTypeDiscoveryService discoveryService;
     private final GlpiAssetDefinitionCatalog definitionCatalog;
     private final CustomAssetUpdateProbeService updateProbeService;
+    private final CustomAssetItemWriteService itemWriteService;
 
     public CustomAssetController(
             GlpiIntegrationService glpiIntegrationService,
             AssetTypeRegistry assetTypeRegistry,
             CustomAssetItemTypeDiscoveryService discoveryService,
             GlpiAssetDefinitionCatalog definitionCatalog,
-            CustomAssetUpdateProbeService updateProbeService) {
+            CustomAssetUpdateProbeService updateProbeService,
+            CustomAssetItemWriteService itemWriteService) {
         this.glpiIntegrationService = glpiIntegrationService;
         this.assetTypeRegistry = assetTypeRegistry;
         this.discoveryService = discoveryService;
         this.definitionCatalog = definitionCatalog;
         this.updateProbeService = updateProbeService;
+        this.itemWriteService = itemWriteService;
     }
 
     /**
@@ -111,10 +116,26 @@ public class CustomAssetController {
         return ResponseEntity.ok(items);
     }
 
-    @Operation(summary = "Listar id + nome dos itens", description = "Ex.: GET .../starlink/summary")
+    @Operation(summary = "Criar item (JSON)", description = "Colunas da planilha no body. Colaborador: use também POST /api/colaboradores.")
+    @PostMapping("/{assetKey}/items")
+    public ResponseEntity<Map<String, Object>> createItem(
+            @PathVariable String assetKey,
+            @RequestBody Map<String, Object> body) {
+        return ResponseEntity.ok(itemWriteService.create(assetKey, body));
+    }
+
+    @Operation(summary = "Atualizar item (JSON)")
+    @PutMapping("/{assetKey}/items/{itemId}")
+    public ResponseEntity<Map<String, Object>> updateItem(
+            @PathVariable String assetKey,
+            @PathVariable int itemId,
+            @RequestBody Map<String, Object> body) {
+        return ResponseEntity.ok(itemWriteService.update(assetKey, itemId, body));
+    }
+
     @GetMapping("/{assetKey}/summary")
     public ResponseEntity<List<IdNameItem>> summary(
-            @Parameter(description = "starlink, chip ou celular") @PathVariable String assetKey,
+            @Parameter(description = "starlink, chip, celular ou colaborador") @PathVariable String assetKey,
             @RequestParam(defaultValue = "0-999") String range) {
         var definition = assetTypeRegistry.get(assetKey);
         return ResponseEntity.ok(glpiIntegrationService.listCustomAssetIdAndNames(definition.itemType(), range));

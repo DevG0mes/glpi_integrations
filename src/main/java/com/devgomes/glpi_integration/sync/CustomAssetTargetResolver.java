@@ -10,7 +10,7 @@ import java.util.Map;
 
 
 
-final class CustomAssetTargetResolver {
+public final class CustomAssetTargetResolver {
 
 
 
@@ -20,7 +20,7 @@ final class CustomAssetTargetResolver {
 
 
 
-    static ResolvedAssetTarget resolve(
+    public static ResolvedAssetTarget resolve(
 
             CustomAssetRow row,
 

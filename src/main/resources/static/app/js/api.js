@@ -75,6 +75,14 @@ const GlpiApi = (() => {
     });
   }
 
+  function putJson(path, data) {
+    return request(path, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data || {}),
+    });
+  }
+
   async function postMultipart(path, file) {
     const form = new FormData();
     form.append("file", file);
@@ -101,5 +109,5 @@ const GlpiApi = (() => {
     return response.json();
   }
 
-  return { get, postJson, postMultipart, getApiKey, setApiKey, securityStatus };
+  return { get, postJson, putJson, postMultipart, request, getApiKey, setApiKey, securityStatus };
 })();

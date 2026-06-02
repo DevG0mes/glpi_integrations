@@ -62,8 +62,22 @@ const ApiDocs = (() => {
       ],
     },
     {
+      id: "colaboradores",
+      title: "Colaboradores (API dedicada)",
+      routes: [
+        { method: "GET", path: "/api/colaboradores/summary", desc: "Lista id + nome" },
+        { method: "GET", path: "/api/colaboradores", desc: "Lista completa (range, expandDropdowns)" },
+        { method: "GET", path: "/api/colaboradores/{id}", desc: "Detalhe por id" },
+        { method: "GET", path: "/api/colaboradores/by-email/{email}", desc: "Detalhe por e-mail" },
+        { method: "POST", path: "/api/colaboradores", desc: "Criar (body: nome, email, departamento, ativo)" },
+        { method: "PUT", path: "/api/colaboradores/{id}", desc: "Atualizar" },
+        { method: "POST", path: "/api/sync/colaborador/validate", desc: "Validar planilha" },
+        { method: "POST", path: "/api/sync/colaborador", desc: "Sync planilha" },
+      ],
+    },
+    {
       id: "custom",
-      title: "Ativos customizados (starlink | chip | celular)",
+      title: "Ativos customizados (starlink | chip | celular | colaborador)",
       routes: [
         { method: "GET", path: "/api/custom-assets/config", desc: "Colunas e itemtypes configurados" },
         { method: "GET", path: "/api/custom-assets/discover", desc: "Descobrir itemtypes GLPI 11" },
@@ -76,6 +90,19 @@ const ApiDocs = (() => {
         { method: "POST", path: "/api/sync/chip", desc: "Sync Chip" },
         { method: "POST", path: "/api/sync/celular/validate", desc: "Validar Celular" },
         { method: "POST", path: "/api/sync/celular", desc: "Sync Celular" },
+      ],
+    },
+    {
+      id: "colaborador",
+      title: "Colaborador (JSON)",
+      routes: [
+        { method: "GET", path: "/api/colaboradores/summary", desc: "Lista id + nome" },
+        { method: "GET", path: "/api/colaboradores", desc: "Lista completa (?range=0-999)" },
+        { method: "GET", path: "/api/colaboradores/{id}", desc: "Um colaborador" },
+        { method: "POST", path: "/api/colaboradores", desc: "Criar (body: nome, email, departamento, ativo)" },
+        { method: "PUT", path: "/api/colaboradores/{id}", desc: "Atualizar" },
+        { method: "POST", path: "/api/sync/colaborador/validate", desc: "Validar planilha" },
+        { method: "POST", path: "/api/sync/colaborador", desc: "Sync planilha" },
       ],
     },
     {

@@ -16,20 +16,20 @@ public class AssetTypeRegistry {
     }
 
     public Set<String> keys() {
-        return defaultKeys();
+        return Set.copyOf(properties.getTypes().keySet());
     }
 
     public GlpiCustomAssetsProperties.CustomAssetDefinition get(String assetKey) {
-        GlpiCustomAssetsProperties.CustomAssetDefinition def = properties.getDefinition(assetKey);
+        if (assetKey == null || assetKey.isBlank()) {
+            throw new IllegalArgumentException("assetKey obrigatório");
+        }
+        String key = assetKey.toLowerCase(java.util.Locale.ROOT);
+        GlpiCustomAssetsProperties.CustomAssetDefinition def = properties.getDefinition(key);
         if (def == null) {
             throw new IllegalArgumentException("Tipo de ativo desconhecido: " + assetKey
-                    + ". Valores: " + defaultKeys());
+                    + ". Valores: " + keys());
         }
         return def;
-    }
-
-    private Set<String> defaultKeys() {
-        return Set.of("starlink", "chip", "celular");
     }
 
     public boolean isSensitiveField(String assetKey, String glpiField) {

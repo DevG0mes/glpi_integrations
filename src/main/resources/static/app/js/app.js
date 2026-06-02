@@ -7,6 +7,7 @@
     { key: "starlink", label: "Starlink", validate: "/api/sync/starlink/validate", sync: "/api/sync/starlink", template: "/app/templates/template_starlink.csv" },
     { key: "chip", label: "Chip", validate: "/api/sync/chip/validate", sync: "/api/sync/chip", template: "/app/templates/template_chip.csv" },
     { key: "celular", label: "Celular", validate: "/api/sync/celular/validate", sync: "/api/sync/celular", template: "/app/templates/template_celular.csv" },
+    { key: "colaborador", label: "Colaborador", validate: "/api/sync/colaborador/validate", sync: "/api/sync/colaborador", template: "/app/templates/template_colaborador.csv" },
   ];
 
   const LOOKUPS = [
@@ -20,7 +21,7 @@
     { path: "/api/computers/summary", label: "Computers (id + nome)" },
   ];
 
-  const ASSET_KEYS = ["starlink", "chip", "celular"];
+  const ASSET_KEYS = ["starlink", "chip", "celular", "colaborador"];
 
   let assetConfig = [];
   let currentRoute = "dashboard";
@@ -73,6 +74,7 @@
       inventory: "Inventário",
       lookups: "Consultas auxiliares",
       item: "Detalhe do item",
+      colaboradores: "Colaboradores",
       docs: "Documentação da API",
     };
     $("#page-title").textContent = titles[viewId] || viewId;
@@ -471,6 +473,122 @@
     });
   }
 
+  function renderColaboradoresView() {
+    const el = $("#view-colaboradores");
+    el.innerHTML = `
+      <div class="grid grid-2">
+        <div class="card">
+          <h2>Novo colaborador</h2>
+          <p class="hint">Chave natural: <code>email</code>. Campos: nome, departamento, ativo (ex.: Sim/Não).</p>
+          <div class="field"><label>Nome</label><input type="text" id="colab-nome" placeholder="Nome completo"></div>
+          <div class="field"><label>E-mail</label><input type="email" id="colab-email" placeholder="email@empresa.com"></div>
+          <div class="field"><label>Departamento</label><input type="text" id="colab-dept" placeholder="TI"></div>
+          <div class="field"><label>Ativo</label><input type="text" id="colab-ativo" placeholder="Sim"></div>
+          <div class="actions-bar">
+            <button type="button" class="btn btn-primary" id="btn-colab-create">Criar (POST)</button>
+          </div>
+          <pre id="colab-create-result" class="json mono" style="margin-top:0.75rem"></pre>
+        </div>
+        <div class="card">
+          <h2>Atualizar colaborador</h2>
+          <div class="field"><label>ID no GLPI</label><input type="number" id="colab-id" min="1" placeholder="ex.: 5"></div>
+          <div class="field"><label>Nome</label><input type="text" id="colab-up-nome"></div>
+          <div class="field"><label>E-mail</label><input type="email" id="colab-up-email"></div>
+          <div class="field"><label>Departamento</label><input type="text" id="colab-up-dept"></div>
+          <div class="field"><label>Ativo</label><input type="text" id="colab-up-ativo"></div>
+          <div class="actions-bar">
+            <button type="button" class="btn btn-secondary" id="btn-colab-load">Carregar (GET)</button>
+            <button type="button" class="btn btn-primary" id="btn-colab-update">Atualizar (PUT)</button>
+          </div>
+          <pre id="colab-update-result" class="json mono" style="margin-top:0.75rem"></pre>
+        </div>
+      </div>
+      <div class="card" style="margin-top:1rem">
+        <h2>Lista</h2>
+        <button type="button" class="btn btn-secondary" id="btn-colab-list">Atualizar lista</button>
+        <div id="colab-list" style="margin-top:0.75rem"></div>
+      </div>
+    `;
+
+    function bodyFromForm(prefix) {
+      const body = {};
+      const nome = $(`#${prefix}-nome`)?.value?.trim();
+      const email = $(`#${prefix}-email`)?.value?.trim();
+      const dept = $(`#${prefix}-dept`)?.value?.trim();
+      const ativo = $(`#${prefix}-ativo`)?.value?.trim();
+      if (nome) body.nome = nome;
+      if (email) body.email = email;
+      if (dept) body.departamento = dept;
+      if (ativo) body.ativo = ativo;
+      return body;
+    }
+
+    $("#btn-colab-create").addEventListener("click", async () => {
+      const out = $("#colab-create-result");
+      out.textContent = "Enviando…";
+      try {
+        const res = await GlpiApi.postJson("/api/colaboradores", bodyFromForm("colab"));
+        out.textContent = JSON.stringify(res, null, 2);
+        toast("Colaborador criado", "success");
+        $("#btn-colab-list").click();
+      } catch (e) {
+        out.textContent = e.message;
+        toast(e.message, "error");
+      }
+    });
+
+    $("#btn-colab-update").addEventListener("click", async () => {
+      const id = parseInt($("#colab-id").value, 10);
+      const out = $("#colab-update-result");
+      if (!id || id < 1) {
+        toast("Informe o ID", "error");
+        return;
+      }
+      out.textContent = "Enviando…";
+      try {
+        const res = await GlpiApi.putJson(`/api/colaboradores/${id}`, bodyFromForm("colab-up"));
+        out.textContent = JSON.stringify(res, null, 2);
+        toast("Atualizado", "success");
+      } catch (e) {
+        out.textContent = e.message;
+        toast(e.message, "error");
+      }
+    });
+
+    $("#btn-colab-load").addEventListener("click", async () => {
+      const id = parseInt($("#colab-id").value, 10);
+      const out = $("#colab-update-result");
+      if (!id || id < 1) {
+        toast("Informe o ID", "error");
+        return;
+      }
+      out.textContent = "Carregando…";
+      try {
+        const res = await GlpiApi.get(`/api/colaboradores/${id}`);
+        out.textContent = JSON.stringify(res, null, 2);
+        const item = res.item || {};
+        if (item.name) $("#colab-up-nome").value = item.name;
+        const email = item.custom_email || item.email;
+        if (email) $("#colab-up-email").value = email;
+        if (item.custom_departamento) $("#colab-up-dept").value = item.custom_departamento;
+        if (item.custom_ativo) $("#colab-up-ativo").value = item.custom_ativo;
+      } catch (e) {
+        out.textContent = e.message;
+      }
+    });
+
+    $("#btn-colab-list").addEventListener("click", async () => {
+      const box = $("#colab-list");
+      box.innerHTML = "<p class=\"hint\">Carregando…</p>";
+      try {
+        const items = await GlpiApi.get("/api/colaboradores/summary?range=0-499");
+        box.innerHTML = renderIdNameTable(items);
+      } catch (e) {
+        box.innerHTML = `<p class="hint" style="color:var(--danger)">${escapeHtml(e.message)}</p>`;
+      }
+    });
+  }
+
   function renderItemView() {
     const el = $("#view-item");
     const assetOptions = ASSET_KEYS.map((k) => `<option value="${k}">${k}</option>`).join("");
@@ -541,6 +659,9 @@
         break;
       case "item":
         renderItemView();
+        break;
+      case "colaboradores":
+        renderColaboradoresView();
         break;
       case "docs":
         $("#view-docs").innerHTML = "<p class=\"hint\">Carregando documentação…</p>";

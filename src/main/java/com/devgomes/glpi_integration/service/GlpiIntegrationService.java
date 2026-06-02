@@ -182,6 +182,10 @@ public class GlpiIntegrationService {
                 .toList();
     }
 
+    public ComputerListResponse listCustomAssetItems(String itemType, String range, boolean expandDropdowns) {
+        return listGlpiItems(itemType, range, expandDropdowns);
+    }
+
     /** Linhas brutas de um itemtype GLPI (ex. definições de ativo). */
     public List<Map<String, Object>> listGlpiItemRows(String itemType, String range) {
         return listGlpiItems(itemType, range, false).items();
