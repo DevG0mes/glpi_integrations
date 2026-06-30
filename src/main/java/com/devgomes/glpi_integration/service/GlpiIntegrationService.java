@@ -305,10 +305,22 @@ public class GlpiIntegrationService {
 
     private ComputerListResponse listGlpiItems(String itemType, String range, boolean expandDropdowns) {
         String effectiveRange = (range == null || range.isBlank()) ? "0-999" : range;
-        log.info("Listando {} GLPI (range={}, expandDropdowns={})", itemType, effectiveRange, expandDropdowns);
 
-        ResponseEntity<String> response = sessionManager.executeWithSession(token ->
-                apiClient.listItems(token, itemType, effectiveRange, expandDropdowns));
+        // CORREÇÃO: Aplicando o mutationType para converter as barras invertidas corretamente antes de enviar à API
+        String mutationType = GlpiItemTypePath.mutationItemType(itemType);
+
+        log.info("Listando {} (mutation={}) GLPI (range={}, expandDropdowns={})", itemType, mutationType, effectiveRange, expandDropdowns);
+
+        ResponseEntity<String> response = sessionManager.executeWithSession(token -> {
+            try {
+                return apiClient.listItems(token, mutationType, effectiveRange, expandDropdowns);
+            } catch (GlpiApiException ex) {
+                if (!mutationType.equals(itemType) && isNotFound(ex)) {
+                    return apiClient.listItems(token, itemType, effectiveRange, expandDropdowns);
+                }
+                throw ex;
+            }
+        });
 
         List<Map<String, Object>> items = parseJsonArray(response.getBody());
         String contentRange = response.getHeaders().getFirst("Content-Range");
@@ -340,11 +352,24 @@ public class GlpiIntegrationService {
 
     private IdNameItem toIdNameItem(Map<String, Object> row) {
         Object id = row.get("id");
-        Object name = row.get("name");
         if (id == null) {
             return null;
         }
         int parsedId = id instanceof Number number ? number.intValue() : Integer.parseInt(id.toString());
+
+        Object name = row.get("name");
+
+        // CORREÇÃO: Fallback inteligente para quando o GLPI não envia o campo "name" preenchido
+        if (name == null || name.toString().isBlank()) {
+            if (row.containsKey("custom_email")) {
+                name = row.get("custom_email");
+            } else if (row.containsKey("custom_iccid")) {
+                name = row.get("custom_iccid");
+            } else if (row.containsKey("custom_imei")) {
+                name = row.get("custom_imei");
+            }
+        }
+
         String parsedName = name != null ? name.toString() : "";
         return new IdNameItem(parsedId, parsedName);
     }
@@ -353,6 +378,14 @@ public class GlpiIntegrationService {
         if (json == null || json.isBlank()) {
             return List.of();
         }
+
+        // Proteção contra o "Fantasma do HTML": estoura erro claro se o GLPI retornar 404 como página web
+        if (json.trim().startsWith("<")) {
+            throw new IllegalStateException("O GLPI retornou uma página HTML em vez de JSON. " +
+                    "A rota mapeada está incorreta. Resposta parcial: " +
+                    json.substring(0, Math.min(json.length(), 200)));
+        }
+
         try {
             return objectMapper.readValue(json, new TypeReference<List<Map<String, Object>>>() {});
         } catch (Exception ex) {
@@ -368,6 +401,12 @@ public class GlpiIntegrationService {
         if (json == null || json.isBlank()) {
             throw new IllegalStateException("Resposta vazia ao buscar item GLPI");
         }
+
+        if (json.trim().startsWith("<")) {
+            throw new IllegalStateException("O GLPI retornou HTML. Rota incorreta. Resposta: " +
+                    json.substring(0, Math.min(json.length(), 200)));
+        }
+
         try {
             return objectMapper.readValue(json, new TypeReference<Map<String, Object>>() {});
         } catch (Exception ex) {

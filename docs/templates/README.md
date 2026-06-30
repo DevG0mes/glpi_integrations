@@ -22,7 +22,7 @@ Arquivos para importar via `POST /api/sync/{starlink|chip|celular}` (campo `file
 
 ### Chip
 
-`id_ativo`, `iccid`, `numero`, `responsavel`, `status`
+`id_ativo`, `iccid`, `numero`, `responsavel`, `status`, `vencimento`
 
 ### Celular
 

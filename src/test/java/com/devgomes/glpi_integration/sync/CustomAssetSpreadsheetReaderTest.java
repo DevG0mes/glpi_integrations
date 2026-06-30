@@ -28,6 +28,7 @@ class CustomAssetSpreadsheetReaderTest {
         assertThat(rows).hasSize(1);
         assertThat(rows.getFirst().naturalKeyValue()).isEqualTo("8900000000000000001");
         assertThat(rows.getFirst().values()).containsEntry("numero", "11999990001");
+        assertThat(rows.getFirst().values()).containsEntry("vencimento", "30/06/2026");
     }
 
     @Test

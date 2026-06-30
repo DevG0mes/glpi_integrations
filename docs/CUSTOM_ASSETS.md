@@ -38,6 +38,7 @@ Chave natural recomendada: campo `name` (ex. `STARLINK-{projeto}-{local}`).
 | numero | Texto |
 | users_id | Usuário |
 | states_id | Status |
+| vencimento | Data |
 
 ### Celular
 
@@ -72,7 +73,7 @@ Os rótulos na tela batem com o middleware:
 | Usuário | `users_id` | `responsavel` ou `usuario` |
 | email | `custom_email` | `email` |
 | Localização (texto) | `custom_localizacao` | `localidade` ou `localizacao` |
-| iccid / numero / Status | `custom_iccid`, `custom_numero`, `states_id` | Chip |
+| iccid / numero / Status / Vencimento | `custom_iccid`, `custom_numero`, `states_id`, `custom_vencimento` | Chip |
 | imei / modelo | `custom_imei`, `custom_modelo` | Celular |
 | Departamento / Email / Ativo | `custom_departamento`, `custom_email`, `custom_ativo` | Colaborador |
 
@@ -185,7 +186,7 @@ Para cadastrar uma **segunda antena** sem alterar a primeira: deixe `id_ativo` e
 
 ### Chip
 
-Colunas: `id_ativo` (opcional), `iccid`, `nome` (opcional), `numero`, `responsavel`, `status`
+Colunas: `id_ativo` (opcional), `iccid`, `nome` (opcional), `numero`, `responsavel`, `status`, `vencimento`
 
 | Coluna planilha | Campo GLPI | Notas |
 |-----------------|------------|--------|
@@ -193,6 +194,7 @@ Colunas: `id_ativo` (opcional), `iccid`, `nome` (opcional), `numero`, `responsav
 | `iccid` | `custom_iccid` | Chave natural; iccid novo sem `id_ativo` → **cria** chip |
 | `nome` | `name` | Rótulo no GLPI (opcional na criação; se vazio, usa o iccid como nome) |
 | `status` | `states_id` | Nome do status (ex. «Em uso») |
+| `vencimento` | `custom_vencimento` | Data; aceita `YYYY-MM-DD` ou `DD/MM/YYYY` e envia `YYYY-MM-DD` ao GLPI |
 
 | Situação | Comportamento |
 |----------|----------------|

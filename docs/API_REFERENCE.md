@@ -135,9 +135,11 @@ Válidas para `starlink`, `chip` e `celular` onde aparece `{assetKey}`.
 | POST | `/api/sync/chip/validate` | `file` = CSV/XLSX | Valida planilha sem gravar. |
 | POST | `/api/sync/chip` | `file` = CSV/XLSX | Sincroniza chips (criar/atualizar). |
 
-**Colunas:** `id_ativo`, `iccid`, `nome` (opcional), `numero`, `responsavel`, `status`
+**Colunas:** `id_ativo`, `iccid`, `nome` (opcional), `numero`, `responsavel`, `status`, `vencimento`
 
 **Chave natural:** `iccid` → `custom_iccid`
+
+**Data de vencimento:** `vencimento` aceita `YYYY-MM-DD` ou `DD/MM/YYYY` e é enviado ao GLPI como `YYYY-MM-DD`.
 
 ---
 

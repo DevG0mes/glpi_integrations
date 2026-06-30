@@ -96,8 +96,8 @@ class SpreadsheetTemplatesGeneratorTest {
     }
 
     private static void criarAbaChip(Workbook workbook) {
-        String[] headers = {"id_ativo", "iccid", "numero", "responsavel", "status"};
-        Object[] exemplo = {1, "8955012345678901234", "11999990000", "usuario.glpi", "Em uso"};
+        String[] headers = {"id_ativo", "iccid", "numero", "responsavel", "status", "vencimento"};
+        Object[] exemplo = {1, "8955012345678901234", "11999990000", "usuario.glpi", "Em uso", "2026-06-30"};
         criarAbaDados(workbook, "Chip", headers, exemplo);
     }
 

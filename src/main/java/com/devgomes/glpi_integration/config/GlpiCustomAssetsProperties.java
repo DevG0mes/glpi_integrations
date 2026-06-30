@@ -85,7 +85,8 @@ public class GlpiCustomAssetsProperties {
                         Map.entry("numero", new FieldMapping("custom_numero", FieldResolverType.DIRECT)),
                         Map.entry("responsavel", new FieldMapping("users_id", FieldResolverType.USER_LOGIN)),
                         Map.entry("usuario", new FieldMapping("users_id", FieldResolverType.USER_LOGIN)),
-                        Map.entry("status", new FieldMapping("states_id", FieldResolverType.STATE_LABEL))
+                        Map.entry("status", new FieldMapping("states_id", FieldResolverType.STATE_LABEL)),
+                        Map.entry("vencimento", new FieldMapping("custom_vencimento", FieldResolverType.DATE))
                 )
         );
     }
@@ -137,6 +138,7 @@ public class GlpiCustomAssetsProperties {
         USER_LOGIN,
         STATE_LABEL,
         LOCATION_LABEL,
+        DATE,
         SENSITIVE
     }
 }

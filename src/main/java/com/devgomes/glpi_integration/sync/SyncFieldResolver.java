@@ -5,6 +5,10 @@ import com.devgomes.glpi_integration.dto.ComputerUpdateRequest;
 import com.devgomes.glpi_integration.service.GlpiIntegrationService;
 
 import java.text.Normalizer;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -13,6 +17,10 @@ import java.util.Map;
  * Resolve campos textuais da planilha (login de usuário, nome de status) para IDs do GLPI.
  */
 public final class SyncFieldResolver {
+
+    private static final DateTimeFormatter ISO_DATE = DateTimeFormatter.ISO_LOCAL_DATE;
+    private static final DateTimeFormatter BRAZILIAN_DATE =
+            DateTimeFormatter.ofPattern("dd/MM/uuuu").withResolverStyle(ResolverStyle.STRICT);
 
     private SyncFieldResolver() {
     }
@@ -89,7 +97,32 @@ public final class SyncFieldResolver {
                 }
                 yield indexes.locationsByLabel().get(normalizeLabelKey(raw));
             }
+            case DATE -> normalizeDate(raw);
         };
+    }
+
+    static String normalizeDate(String raw) {
+        String value = raw == null ? "" : raw.trim();
+        if (value.isEmpty()) {
+            return null;
+        }
+        if (value.matches("\\d{4}-\\d{2}-\\d{2}")) {
+            return parseDate(value, ISO_DATE).format(ISO_DATE);
+        }
+        if (value.matches("\\d{2}/\\d{2}/\\d{4}")) {
+            return parseDate(value, BRAZILIAN_DATE).format(ISO_DATE);
+        }
+        throw new IllegalArgumentException(
+                "Data inválida: '" + raw + "'. Use YYYY-MM-DD ou DD/MM/YYYY.");
+    }
+
+    private static LocalDate parseDate(String value, DateTimeFormatter formatter) {
+        try {
+            return LocalDate.parse(value, formatter);
+        } catch (DateTimeParseException ex) {
+            throw new IllegalArgumentException(
+                    "Data inválida: '" + value + "'. Use YYYY-MM-DD ou DD/MM/YYYY.", ex);
+        }
     }
 
     private static Integer resolveUserId(Integer id, String label, Map<String, Integer> index) {

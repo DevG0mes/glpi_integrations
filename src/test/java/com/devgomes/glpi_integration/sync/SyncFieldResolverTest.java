@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class SyncFieldResolverTest {
 
@@ -41,5 +42,22 @@ class SyncFieldResolverTest {
     void isNullLiteral_treatsNullStringAsEmpty() {
         assertThat(SyncFieldResolver.isNullLiteral("null")).isTrue();
         assertThat(SyncFieldResolver.isNullLiteral("NULL")).isTrue();
+    }
+
+    @Test
+    void normalizeDate_keepsIsoDate() {
+        assertThat(SyncFieldResolver.normalizeDate("2026-06-30")).isEqualTo("2026-06-30");
+    }
+
+    @Test
+    void normalizeDate_convertsBrazilianDate() {
+        assertThat(SyncFieldResolver.normalizeDate("30/06/2026")).isEqualTo("2026-06-30");
+    }
+
+    @Test
+    void normalizeDate_rejectsInvalidDate() {
+        assertThatThrownBy(() -> SyncFieldResolver.normalizeDate("30-06-26"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Use YYYY-MM-DD ou DD/MM/YYYY");
     }
 }

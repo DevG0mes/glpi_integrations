@@ -1,5 +1,6 @@
 package com.devgomes.glpi_integration.web;
 
+import com.devgomes.glpi_integration.config.GlpiCustomAssetsProperties;
 import com.devgomes.glpi_integration.dto.ColaboradorWriteRequest;
 import com.devgomes.glpi_integration.dto.ComputerListResponse;
 import com.devgomes.glpi_integration.dto.IdNameItem;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Tag(name = "Colaborador", description = "Ativo customizado GLPI — Colaborador (nome, departamento, email, ativo)")
 @RestController
@@ -42,11 +44,25 @@ public class ColaboradorController {
         this.itemWriteService = itemWriteService;
     }
 
+    /**
+     * Validação interna para garantir que o registro do ativo está correto no Registry.
+     * O ItemType esperado pelo GLPI para este ativo é "Glpi\\CustomAsset\\ColaboradorAsset".
+     *
+     * @return
+     */
+    private GlpiCustomAssetsProperties.CustomAssetDefinition getValidatedDefinition() {
+        var definition = assetTypeRegistry.get(ASSET_KEY);
+        Objects.requireNonNull(definition,
+                "O ativo '" + ASSET_KEY + "' não está registrado no AssetTypeRegistry. " +
+                        "Certifique-se de mapeá-lo usando o ItemType exato: Glpi\\CustomAsset\\ColaboradorAsset");
+        return definition;
+    }
+
     @Operation(summary = "Listar colaboradores (id + nome)")
     @GetMapping("/summary")
     public ResponseEntity<List<IdNameItem>> summary(
             @RequestParam(defaultValue = "0-999") String range) {
-        var definition = assetTypeRegistry.get(ASSET_KEY);
+        var definition = getValidatedDefinition();
         return ResponseEntity.ok(glpiIntegrationService.listCustomAssetIdAndNames(definition.itemType(), range));
     }
 
@@ -55,7 +71,7 @@ public class ColaboradorController {
     public ResponseEntity<ComputerListResponse> list(
             @RequestParam(defaultValue = "0-999") String range,
             @RequestParam(defaultValue = "false") boolean expandDropdowns) {
-        var definition = assetTypeRegistry.get(ASSET_KEY);
+        var definition = getValidatedDefinition();
         return ResponseEntity.ok(
                 glpiIntegrationService.listCustomAssetItems(definition.itemType(), range, expandDropdowns));
     }
@@ -65,15 +81,19 @@ public class ColaboradorController {
     public ResponseEntity<Map<String, Object>> getByEmail(
             @PathVariable String email,
             @RequestParam(defaultValue = "false") boolean expandDropdowns) {
-        var definition = assetTypeRegistry.get(ASSET_KEY);
+        var definition = getValidatedDefinition();
         glpiIntegrationService.initSession();
+
         Map<String, Integer> index = glpiIntegrationService.buildFieldValueIndex(
                 definition.itemType(), definition.naturalKeyField(), "0-9999");
+
         String key = com.devgomes.glpi_integration.sync.SyncFieldResolver.normalizeLabelKey(email);
         Integer id = index.get(key);
+
         if (id == null) {
             throw new IllegalArgumentException("Colaborador não encontrado para email: " + email);
         }
+
         return getById(id, expandDropdowns);
     }
 
@@ -82,10 +102,12 @@ public class ColaboradorController {
     public ResponseEntity<Map<String, Object>> getById(
             @PathVariable int id,
             @RequestParam(defaultValue = "false") boolean expandDropdowns) {
-        var definition = assetTypeRegistry.get(ASSET_KEY);
+        var definition = getValidatedDefinition();
         glpiIntegrationService.initSession();
+
         Map<String, Object> item = glpiIntegrationService.getItem(definition.itemType(), id, expandDropdowns);
         Map<String, Object> body = new LinkedHashMap<>();
+
         body.put("assetKey", ASSET_KEY);
         body.put("itemType", definition.itemType());
         body.put("itemId", id);
@@ -95,6 +117,7 @@ public class ColaboradorController {
                 .filter(k -> k.startsWith("custom_"))
                 .sorted()
                 .toList());
+
         return ResponseEntity.ok(body);
     }
 

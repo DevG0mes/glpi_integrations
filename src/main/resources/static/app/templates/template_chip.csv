@@ -1,2 +1,2 @@
-id_ativo;iccid;nome;numero;responsavel;status
-;8955012345678901999;Chip Novo;11988887777;usuario.glpi;Em uso
+id_ativo;iccid;nome;numero;responsavel;status;Vencimento
+;8955012345678901999;Chip Novo;11988887777;usuario.glpi;Em uso;30/06/2026
