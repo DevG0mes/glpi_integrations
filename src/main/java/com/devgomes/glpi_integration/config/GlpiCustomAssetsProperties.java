@@ -86,7 +86,7 @@ public class GlpiCustomAssetsProperties {
                         Map.entry("responsavel", new FieldMapping("users_id", FieldResolverType.USER_LOGIN)),
                         Map.entry("usuario", new FieldMapping("users_id", FieldResolverType.USER_LOGIN)),
                         Map.entry("status", new FieldMapping("states_id", FieldResolverType.STATE_LABEL)),
-                        Map.entry("vencimento", new FieldMapping("custom_vencimento", FieldResolverType.DATE))
+                        Map.entry("vencimento", new FieldMapping("custom_data_vencimento", FieldResolverType.DATE))
                 )
         );
     }
