@@ -81,6 +81,7 @@ public class GenericItemSyncBatchService {
                             action + " (" + target.matchedBy() + "): " + masked));
                 } else if (target.create()) {
                     int newId = glpiIntegrationService.createItem(definition.itemType(), fields);
+                    applyPostCreateDateUpdate(definition, newId, fields);
                     results.add(new SyncLineResult(row.lineNumber(), newId, true,
                             "OK (criado id=" + newId + ")"));
                 } else {
@@ -151,6 +152,32 @@ public class GenericItemSyncBatchService {
             int itemId,
             Map<String, Object> fields) {
         glpiIntegrationService.updateItem(definition.itemType(), itemId, fields);
+    }
+
+    private void applyPostCreateDateUpdate(
+            GlpiCustomAssetsProperties.CustomAssetDefinition definition,
+            int itemId,
+            Map<String, Object> fields) {
+        Map<String, Object> dateFields = extractDateFields(definition, fields);
+        if (dateFields.isEmpty()) {
+            return;
+        }
+        log.info("Reaplicando {} campo(s) de data via PUT após criação do id={}: {}",
+                dateFields.size(), itemId, dateFields.keySet());
+        glpiIntegrationService.updateItem(definition.itemType(), itemId, dateFields);
+    }
+
+    private static Map<String, Object> extractDateFields(
+            GlpiCustomAssetsProperties.CustomAssetDefinition definition,
+            Map<String, Object> fields) {
+        Map<String, Object> dateFields = new LinkedHashMap<>();
+        for (GlpiCustomAssetsProperties.FieldMapping mapping : definition.columns().values()) {
+            if (mapping.resolverType() == GlpiCustomAssetsProperties.FieldResolverType.DATE
+                    && fields.containsKey(mapping.glpiField())) {
+                dateFields.put(mapping.glpiField(), fields.get(mapping.glpiField()));
+            }
+        }
+        return dateFields;
     }
 
     private String retryFieldByField(

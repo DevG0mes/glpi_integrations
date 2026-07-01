@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -240,8 +241,8 @@ public class GlpiIntegrationService {
         }
 
         String mutationType = GlpiItemTypePath.mutationItemType(itemType);
-        log.info("Atualizando {} id={} com {} campo(s) via PUT em {}",
-                itemType, itemId, payload.size(), mutationType);
+        log.info("Atualizando {} id={} com {} campo(s) via PUT em {}: {}",
+                itemType, itemId, payload.size(), mutationType, summarizeFieldKeys(payload));
         Map<String, Object> finalPayload = payload;
         sessionManager.runWithSession(token -> {
             if (mutationType.equals(itemType)) {
@@ -288,9 +289,26 @@ public class GlpiIntegrationService {
             throw new IllegalArgumentException("Nenhum campo informado para criação de " + itemType);
         }
         String mutationType = GlpiItemTypePath.mutationItemType(itemType);
-        log.info("Criando {} (mutation={}) com {} campo(s)", itemType, mutationType, fields.size());
+        log.info("Criando {} (mutation={}) com {} campo(s): {}",
+                itemType, mutationType, fields.size(), summarizeFieldKeys(fields));
         return sessionManager.executeWithSession(token ->
                 apiClient.createItem(token, mutationType, fields));
+    }
+
+    private static Map<String, Object> summarizeFieldKeys(Map<String, Object> fields) {
+        Map<String, Object> summary = new LinkedHashMap<>();
+        for (Map.Entry<String, Object> entry : fields.entrySet()) {
+            String key = entry.getKey();
+            if (key == null) {
+                continue;
+            }
+            if (key.startsWith("custom_") && key.contains("vencimento")) {
+                summary.put(key, entry.getValue());
+            } else {
+                summary.put(key, "<set>");
+            }
+        }
+        return summary;
     }
 
     private Map<String, Integer> buildLabelIndex(List<IdNameItem> items) {

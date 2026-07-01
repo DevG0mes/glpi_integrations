@@ -49,6 +49,7 @@ public class CustomAssetItemWriteService {
         Map<String, Object> fields = resolveFields(assetKey, row, definition);
         ensureNameForCreate(row, definition, fields);
         int newId = glpiIntegrationService.createItem(definition.itemType(), fields);
+        applyPostCreateDateUpdate(definition, newId, fields);
         return responseMap(assetKey, definition, newId, "created", fields);
     }
 
@@ -89,6 +90,23 @@ public class CustomAssetItemWriteService {
         if (name != null && !name.isBlank()) {
             fields.put("name", name.trim());
         }
+    }
+
+    private void applyPostCreateDateUpdate(
+            GlpiCustomAssetsProperties.CustomAssetDefinition definition,
+            int itemId,
+            Map<String, Object> fields) {
+        Map<String, Object> dateFields = new LinkedHashMap<>();
+        for (GlpiCustomAssetsProperties.FieldMapping mapping : definition.columns().values()) {
+            if (mapping.resolverType() == GlpiCustomAssetsProperties.FieldResolverType.DATE
+                    && fields.containsKey(mapping.glpiField())) {
+                dateFields.put(mapping.glpiField(), fields.get(mapping.glpiField()));
+            }
+        }
+        if (dateFields.isEmpty()) {
+            return;
+        }
+        glpiIntegrationService.updateItem(definition.itemType(), itemId, dateFields);
     }
 
     private static Map<String, String> toColumnMap(
