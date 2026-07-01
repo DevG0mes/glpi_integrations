@@ -25,7 +25,7 @@ class GlpiFieldFilterTest {
         assertThat(result.fields()).containsEntry("name", "KIT-1");
         assertThat(result.fields()).containsEntry("custom_projeto", "PCS");
         assertThat(result.droppedFieldNames()).containsExactlyInAnyOrder(
-                "custom_senha_conta_starlink", "custom_unknown");
+                "custom_unknown");
     }
 
     @Test
@@ -36,5 +36,20 @@ class GlpiFieldFilterTest {
         GlpiFieldFilter.FilterResult result = GlpiFieldFilter.retainFieldsKnownToItem(proposed, existing);
 
         assertThat(result.fields()).containsEntry("entities_id", 5);
+    }
+
+    @Test
+    void keepsCustomFieldsEvenWhenGetItemDoesNotExposeThem() {
+        Map<String, Object> proposed = Map.of(
+                "custom_vencimento", "2026-06-30",
+                "name", "Chip 1");
+        Map<String, Object> existing = Map.of(
+                "id", 1,
+                "name", "old");
+
+        GlpiFieldFilter.FilterResult result = GlpiFieldFilter.retainFieldsKnownToItem(proposed, existing);
+
+        assertThat(result.fields()).containsEntry("custom_vencimento", "2026-06-30");
+        assertThat(result.droppedFieldNames()).isEmpty();
     }
 }

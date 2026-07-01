@@ -1,7 +1,9 @@
 package com.devgomes.glpi_integration.sync;
 
+import com.devgomes.glpi_integration.config.GlpiCustomAssetsProperties;
 import org.junit.jupiter.api.Test;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -59,5 +61,17 @@ class SyncFieldResolverTest {
         assertThatThrownBy(() -> SyncFieldResolver.normalizeDate("30-06-26"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Use YYYY-MM-DD ou DD/MM/YYYY");
+    }
+
+    @Test
+    void resolveCustomAssetFields_normalizesChipDueDate() {
+        var definition = new GlpiCustomAssetsProperties().getDefinition("chip");
+        var values = new LinkedHashMap<String, String>();
+        values.put("vencimento", "30/06/2026");
+        var row = new CustomAssetRow(2, 0, "8900000000000000001", values);
+
+        var fields = SyncFieldResolver.resolveCustomAssetFields("chip", row, definition, SyncLookupIndexes.empty());
+
+        assertThat(fields).containsEntry("custom_vencimento", "2026-06-30");
     }
 }

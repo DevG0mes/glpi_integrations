@@ -7,7 +7,9 @@ import java.util.Set;
 
 /**
  * Reduz o payload de PUT aos campos que o GLPI expõe no GET do item.
- * Evita {@code ERROR_GLPI_UPDATE} por chaves {@code custom_*} com nome de sistema incorreto.
+ * Campos {@code custom_*} são preservados mesmo quando o GET não os devolve,
+ * porque alguns ativos customizados do GLPI omitem essas chaves na leitura
+ * mas ainda assim aceitam a gravação no PUT.
  */
 public final class GlpiFieldFilter {
 
@@ -30,7 +32,7 @@ public final class GlpiFieldFilter {
 
         for (Map.Entry<String, Object> entry : proposed.entrySet()) {
             String key = entry.getKey();
-            if (itemKeys.contains(key)) {
+            if (itemKeys.contains(key) || isCustomField(key)) {
                 retained.put(key, entry.getValue());
             } else {
                 dropped.add(key);
@@ -56,6 +58,10 @@ public final class GlpiFieldFilter {
         if (!retained.containsKey(key) && existingItem.get(key) != null) {
             retained.put(key, existingItem.get(key));
         }
+    }
+
+    private static boolean isCustomField(String key) {
+        return key != null && key.startsWith("custom_");
     }
 
     public record FilterResult(Map<String, Object> fields, List<String> droppedFieldNames) {
