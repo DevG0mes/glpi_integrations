@@ -18,10 +18,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 public class GlpiIntegrationService {
@@ -61,6 +63,18 @@ public class GlpiIntegrationService {
                 .map(this::toIdNameItem)
                 .filter(item -> item != null)
                 .toList();
+    }
+
+    public Set<Integer> buildComputerIdSet(String range) {
+        Set<Integer> ids = new HashSet<>();
+        for (IdNameItem item : listComputerIdAndNames(range)) {
+            ids.add(item.id());
+        }
+        return ids;
+    }
+
+    public List<Map<String, Object>> listComputerRows(String range) {
+        return listComputers(range, false).items();
     }
 
     /** Mapa name (normalizado) → id do Computer, para resolver linhas do CSV por id_ativo. */
@@ -366,6 +380,16 @@ public class GlpiIntegrationService {
         log.info("Atualizando Computer id={} com {} campo(s)", computerId, fields.size());
         sessionManager.runWithSession(token ->
                 apiClient.updateComputer(token, computerId, fields));
+    }
+
+    public int createComputer(ComputerUpdateRequest request) {
+        var fields = request.toInputMap();
+        if (fields.isEmpty()) {
+            throw new IllegalArgumentException("Nenhum campo informado para criação do Computer");
+        }
+        log.info("Criando Computer com {} campo(s)", fields.size());
+        return sessionManager.executeWithSession(token ->
+                apiClient.createItem(token, "Computer", fields));
     }
 
     private IdNameItem toIdNameItem(Map<String, Object> row) {

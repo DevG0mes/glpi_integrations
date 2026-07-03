@@ -173,10 +173,10 @@ Válidas para `starlink`, `chip` e `celular` onde aparece `{assetKey}`.
 | Método | Rota | Body | Para que serve |
 |--------|------|------|----------------|
 | POST | `/api/sync/computers/validate` | `file` = CSV/XLSX | Dry-run da planilha de Computers. |
-| POST | `/api/sync/computers` | `file` = CSV/XLSX | Atualiza Computers no GLPI (por `id_ativo` ou Service TAG). |
+| POST | `/api/sync/computers` | `file` = CSV/XLSX | Sincroniza Computers no GLPI: atualiza por `id_ativo`/nome quando existir e cria quando não existir. |
 | POST | `/api/sync/computers/run` | — | Sync usando caminho fixo em `glpi.sync.input-path` (config). |
 
-**Nota:** sync de Computer hoje **só atualiza** itens existentes (não cria Computer novo).
+**Regra do `id_ativo` em Computers:** se o ID existir no GLPI, a linha é atualizada; se o ID informado não existir, um novo Computer é criado. Se `id_ativo` vier textual, ele é tratado como nome do Computer: atualiza quando encontra e cria quando não encontra.
 
 ---
 

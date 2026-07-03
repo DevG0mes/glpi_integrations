@@ -3,11 +3,11 @@
  */
 (() => {
   const SYNC_TYPES = [
-    { key: "computers", label: "Computers", validate: "/api/sync/computers/validate", sync: "/api/sync/computers", template: "/app/templates/template_computers.csv", note: "Apenas atualiza itens existentes (não cria)." },
-    { key: "starlink", label: "Starlink", validate: "/api/sync/starlink/validate", sync: "/api/sync/starlink", template: "/app/templates/template_starlink.csv" },
-    { key: "chip", label: "Chip", validate: "/api/sync/chip/validate", sync: "/api/sync/chip", template: "/app/templates/template_chip.csv" },
-    { key: "celular", label: "Celular", validate: "/api/sync/celular/validate", sync: "/api/sync/celular", template: "/app/templates/template_celular.csv" },
-    { key: "colaborador", label: "Colaborador", validate: "/api/sync/colaborador/validate", sync: "/api/sync/colaborador", template: "/app/templates/template_colaborador.csv" },
+    { key: "computers", label: "Computers", validate: "/api/sync/computers/validate", sync: "/api/sync/computers", template: "/api/templates/computers.csv", note: "Com `id_ativo`: atualiza se existir; se não existir, cria um novo Computer." },
+    { key: "starlink", label: "Starlink", validate: "/api/sync/starlink/validate", sync: "/api/sync/starlink", template: "/api/templates/starlink.csv" },
+    { key: "chip", label: "Chip", validate: "/api/sync/chip/validate", sync: "/api/sync/chip", template: "/api/templates/chip.csv" },
+    { key: "celular", label: "Celular", validate: "/api/sync/celular/validate", sync: "/api/sync/celular", template: "/api/templates/celular.csv" },
+    { key: "colaborador", label: "Colaborador", validate: "/api/sync/colaborador/validate", sync: "/api/sync/colaborador", template: "/api/templates/colaborador.csv" },
   ];
 
   const LOOKUPS = [
