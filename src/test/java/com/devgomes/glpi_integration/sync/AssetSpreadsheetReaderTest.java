@@ -3,6 +3,7 @@ package com.devgomes.glpi_integration.sync;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -52,5 +53,18 @@ class AssetSpreadsheetReaderTest {
                 .isEqualTo("id_ativo_name");
         assertThat(AssetSpreadsheetReader.normalizeHeader("id_model(modelo)"))
                 .contains("id_model");
+    }
+
+    @Test
+    void read_mapsAtivoColumnToDisplayName() throws Exception {
+        Path file = Files.createTempFile("sample-computers-ativo", ".csv");
+        Files.writeString(file, """
+                Service TAG,ATIVO,id_ativo,id_model,RESPONSAVEL,Status
+                9TCMLZ1,PSI-016,1558,1,evellyn.cavalcante,Em uso
+                """);
+
+        var rows = reader.read(file);
+
+        assertThat(rows.getFirst().displayName()).isEqualTo("PSI-016");
     }
 }

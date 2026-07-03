@@ -109,5 +109,28 @@ const GlpiApi = (() => {
     return response.json();
   }
 
-  return { get, postJson, putJson, postMultipart, request, getApiKey, setApiKey, securityStatus };
+  async function download(path, filenameFallback = "download.csv") {
+    const url = base + path;
+    const response = await fetch(url, {
+      method: "GET",
+      headers: authHeaders({ Accept: "text/csv,application/octet-stream,*/*" }),
+    });
+    if (!response.ok) {
+      const text = await response.text();
+      const err = new Error(text || response.statusText);
+      err.status = response.status;
+      throw err;
+    }
+    const blob = await response.blob();
+    const disposition = response.headers.get("content-disposition") || "";
+    const match = disposition.match(/filename\*?=(?:UTF-8'')?\"?([^\";]+)\"?/i);
+    const filename = match ? decodeURIComponent(match[1]) : filenameFallback;
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  return { get, postJson, putJson, postMultipart, request, getApiKey, setApiKey, securityStatus, download };
 })();

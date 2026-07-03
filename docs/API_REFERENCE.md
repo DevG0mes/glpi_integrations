@@ -178,6 +178,8 @@ Válidas para `starlink`, `chip` e `celular` onde aparece `{assetKey}`.
 
 **Regra do `id_ativo` em Computers:** se o ID existir no GLPI, a linha é atualizada; se o ID informado não existir, um novo Computer é criado. Se `id_ativo` vier textual, ele é tratado como nome do Computer: atualiza quando encontra e cria quando não encontra.
 
+**Mapeamento de patrimônio em Computers:** as colunas `nome`, `ATIVO`, `patrimonio` e `numero_patrimonio` são aceitas como origem do campo `name` no GLPI.
+
 ---
 
 ## Upload de planilha (todas as rotas POST /api/sync/*)

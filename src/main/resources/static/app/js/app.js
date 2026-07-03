@@ -261,7 +261,7 @@
             <label for="sync-file">Arquivo</label>
             <input type="file" id="sync-file" accept=".csv,.xlsx,.xls">
           </div>
-          <a class="btn btn-secondary" href="${type.template}" download>Baixar modelo CSV</a>
+          <button type="button" class="btn btn-secondary" id="btn-download-template">Baixar modelo CSV</button>
         </div>
         <p id="file-name" class="hint"></p>
         <div class="actions-bar">
@@ -315,6 +315,14 @@
     });
 
     $("#btn-validate").addEventListener("click", () => runSync(type.validate, "Validação concluída"));
+    $("#btn-download-template").addEventListener("click", async () => {
+      try {
+        await GlpiApi.download(type.template, `template_${type.key}.csv`);
+        toast("Modelo CSV baixado", "success");
+      } catch (e) {
+        toast(e.message, "error");
+      }
+    });
     $("#btn-sync").addEventListener("click", () => {
       if (!confirm("Gravar alterações no GLPI? Confirme que já validou a planilha.")) return;
       runSync(type.sync, "Sincronização concluída");

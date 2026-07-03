@@ -138,7 +138,9 @@ public class AssetSpreadsheetReader {
         if (normalized.equals("fabricante") || normalized.equals("manufacturers_id")) {
             putAlias(index, "manufacturers_id", column);
         }
-        if (normalized.equals("nome") || normalized.equals("display_name")) {
+        if (normalized.equals("nome") || normalized.equals("display_name")
+                || normalized.equals("ativo") || normalized.equals("patrimonio")
+                || normalized.equals("numero_patrimonio")) {
             putAlias(index, "display_name", column);
         }
         if (normalized.equals("observacao") || normalized.equals("comment")) {
