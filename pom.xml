@@ -128,6 +128,7 @@
                             <goal>testCompile</goal>
                         </goals>
                         <configuration>
+                            <skip>${skipTests}</skip>
                             <annotationProcessorPaths>
                                 <path>
                                     <groupId>org.projectlombok</groupId>

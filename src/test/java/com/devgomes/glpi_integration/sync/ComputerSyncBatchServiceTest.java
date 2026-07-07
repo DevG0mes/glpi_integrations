@@ -43,10 +43,14 @@ class ComputerSyncBatchServiceTest {
     @Test
     void processRows_continuesOnFailureAndBuildsReport() {
         var rows = List.of(
-                new AssetUpdateRow(2, 10, null, null, null, null, null, 11, "SN-1", null, null,
-                        null, null, null, null, null, null, null, null, null),
-                new AssetUpdateRow(3, 11, null, null, null, null, null, 12, "SN-2", null, null,
-                        null, null, null, null, null, null, null, null, null)
+                new AssetUpdateRow(
+                        2, 10, null, null, null, null, null, 11, "SN-1", null, null,
+                        null, null, null, null, null, null, null, null, null, null, null
+                ),
+                new AssetUpdateRow(
+                        3, 11, null, null, null, null, null, 12, "SN-2", null, null,
+                        null, null, null, null, null, null, null, null, null, null, null
+                )
         );
 
         when(glpiIntegrationService.initSession()).thenReturn("sess");
@@ -70,8 +74,10 @@ class ComputerSyncBatchServiceTest {
     @Test
     void processRows_createsComputerWhenNumericIdDoesNotExist() {
         var rows = List.of(
-                new AssetUpdateRow(2, 9999, null, null, null, null, null, null, "SN-NEW", null, null,
-                        null, null, null, null, null, null, null, null, "Notebook novo")
+                new AssetUpdateRow(
+                        2, 9999, null, null, null, null, null, null, "SN-NEW", null, null,
+                        null, null, null, null, null, null, null, null, "Notebook novo", null, null
+                )
         );
 
         when(glpiIntegrationService.initSession()).thenReturn("sess");
@@ -92,8 +98,10 @@ class ComputerSyncBatchServiceTest {
     @Test
     void processRows_dryRunSignalsCreateWhenNameDoesNotExist() {
         var rows = List.of(
-                new AssetUpdateRow(2, 0, "NOTEBOOK-ABC", null, null, null, null, null, "SN-NEW", null, null,
-                        null, null, null, null, null, null, null, null, null)
+                new AssetUpdateRow(
+                        2, 0, "NOTEBOOK-ABC", null, null, null, null, null, "SN-NEW", null, null,
+                        null, null, null, null, null, null, null, null, null, null, null
+                )
         );
 
         when(glpiIntegrationService.initSession()).thenReturn("sess");
