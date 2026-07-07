@@ -55,6 +55,7 @@ const ApiDocs = (() => {
       title: "Computers",
       routes: [
         { method: "GET", path: "/api/computers/summary", desc: "Lista resumida" },
+        { method: "GET", path: "/api/computers/report", desc: "Relatório enriquecido com garantias relacionadas por patrimônio/serial" },
         { method: "GET", path: "/api/computers/{id}", desc: "Detalhe" },
         { method: "PUT", path: "/api/computers/{id}", desc: "Atualizar um computer (JSON)" },
         { method: "POST", path: "/api/sync/computers/validate", desc: "Validar planilha (multipart file)" },
@@ -77,7 +78,7 @@ const ApiDocs = (() => {
     },
     {
       id: "custom",
-      title: "Ativos customizados (starlink | chip | celular | colaborador)",
+      title: "Ativos customizados (starlink | chip | celular | colaborador | garantia)",
       routes: [
         { method: "GET", path: "/api/custom-assets/config", desc: "Colunas e itemtypes configurados" },
         { method: "GET", path: "/api/custom-assets/discover", desc: "Descobrir itemtypes GLPI 11" },
@@ -90,6 +91,8 @@ const ApiDocs = (() => {
         { method: "POST", path: "/api/sync/chip", desc: "Sync Chip" },
         { method: "POST", path: "/api/sync/celular/validate", desc: "Validar Celular" },
         { method: "POST", path: "/api/sync/celular", desc: "Sync Celular" },
+        { method: "POST", path: "/api/sync/garantia/validate", desc: "Validar Garantia" },
+        { method: "POST", path: "/api/sync/garantia", desc: "Sync Garantia" },
       ],
     },
     {

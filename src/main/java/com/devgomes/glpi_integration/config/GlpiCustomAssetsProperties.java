@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Definições dos ativos customizados GLPI 11 (Starlink, Chip, Celular, Colaborador).
+ * Definições dos ativos customizados GLPI 11 (Starlink, Chip, Celular, Colaborador, Garantia).
  * Ajuste {@code item-type} após criar as definições no GLPI — ver docs/CUSTOM_ASSETS.md.
  */
 @ConfigurationProperties(prefix = "glpi.custom-assets")
@@ -50,6 +50,7 @@ public class GlpiCustomAssetsProperties {
         map.put("chip", chipDefaults());
         map.put("celular", celularDefaults());
         map.put("colaborador", colaboradorDefaults());
+        map.put("garantia", garantiaDefaults());
         return map;
     }
 
@@ -117,6 +118,28 @@ public class GlpiCustomAssetsProperties {
                         Map.entry("email", new FieldMapping("custom_email", FieldResolverType.NATURAL_KEY)),
                         Map.entry("departamento", new FieldMapping("custom_departamento", FieldResolverType.DIRECT)),
                         Map.entry("ativo", new FieldMapping("custom_ativo", FieldResolverType.DIRECT))
+                )
+        );
+    }
+
+    private static CustomAssetDefinition garantiaDefaults() {
+        return new CustomAssetDefinition(
+                "Glpi\\Asset\\AssetDefinition/ControleGarantia",
+                "name",
+                List.of(),
+                Map.ofEntries(
+                        Map.entry("nome", new FieldMapping("name", FieldResolverType.NATURAL_KEY)),
+                        Map.entry("patrimonio", new FieldMapping("name", FieldResolverType.NATURAL_KEY)),
+                        Map.entry("patrimonio_notebook", new FieldMapping("name", FieldResolverType.NATURAL_KEY)),
+                        Map.entry("numero_patrimonio", new FieldMapping("name", FieldResolverType.NATURAL_KEY)),
+                        Map.entry("status", new FieldMapping("states_id", FieldResolverType.STATE_LABEL)),
+                        Map.entry("vencimento_garantia", new FieldMapping("custom_vencimento_garantia", FieldResolverType.DATE)),
+                        Map.entry("custo", new FieldMapping("custom_custo", FieldResolverType.DIRECT)),
+                        Map.entry("numero_de_serie", new FieldMapping("custom_numero_de_serie", FieldResolverType.DIRECT)),
+                        Map.entry("numero_serie", new FieldMapping("custom_numero_de_serie", FieldResolverType.DIRECT)),
+                        Map.entry("serial", new FieldMapping("custom_numero_de_serie", FieldResolverType.DIRECT)),
+                        Map.entry("nfs", new FieldMapping("custom_nfs", FieldResolverType.DIRECT)),
+                        Map.entry("modelo_garantia", new FieldMapping("custom_modelo_garantia", FieldResolverType.DIRECT))
                 )
         );
     }

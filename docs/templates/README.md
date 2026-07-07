@@ -1,6 +1,6 @@
 # Planilhas modelo (sync GLPI)
 
-Arquivos para importar via `POST /api/sync/{computers|starlink|chip|celular}` (campo `file`, CSV ou XLSX).
+Arquivos para importar via `POST /api/sync/{computers|starlink|chip|celular|garantia}` (campo `file`, CSV ou XLSX).
 
 ## Arquivos
 
@@ -10,6 +10,7 @@ Arquivos para importar via `POST /api/sync/{computers|starlink|chip|celular}` (c
 | `template_starlink.csv` | Starlink (abre no Excel; separador `;`) |
 | `template_chip.csv` | Chip |
 | `template_celular.csv` | Celular |
+| `template_garantia.csv` | Garantia |
 | `templates_sincronizacao_ativos.xlsx` | Pasta de trabalho com 3 abas (gerar com Maven, abaixo) |
 | `template_starlink.xlsx` | Somente Starlink (gerar com Maven) |
 | `template_chip.xlsx` | Somente Chip (gerar com Maven) |
@@ -32,6 +33,10 @@ Arquivos para importar via `POST /api/sync/{computers|starlink|chip|celular}` (c
 ### Celular
 
 `id_ativo`, `imei`, `modelo`, `responsavel`, `nome`
+
+### Garantia
+
+`id_ativo`, `nome`, `status`, `vencimento_garantia`, `custo`, `numero_de_serie`, `nfs`, `modelo_garantia`
 
 Linha 2 = exemplo opcional — substitua pelos seus dados ou apague após copiar o cabeçalho.
 

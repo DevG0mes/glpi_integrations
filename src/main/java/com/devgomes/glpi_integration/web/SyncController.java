@@ -94,6 +94,17 @@ public class SyncController {
         return ResponseEntity.ok(runWithTempFile(file, path -> customBatchService.validateFromFile("colaborador", path)));
     }
 
+    @Operation(summary = "Sincronizar Garantia", description = "Cria ou atualiza garantias. Chave natural: nome/patrimônio.")
+    @PostMapping(value = "/garantia", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<SyncReport> syncGarantia(@RequestParam("file") MultipartFile file) throws Exception {
+        return ResponseEntity.ok(runWithTempFile(file, path -> customBatchService.syncFromFile("garantia", path)));
+    }
+
+    @PostMapping(value = "/garantia/validate", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<SyncReport> validateGarantia(@RequestParam("file") MultipartFile file) throws Exception {
+        return ResponseEntity.ok(runWithTempFile(file, path -> customBatchService.validateFromFile("garantia", path)));
+    }
+
     @FunctionalInterface
     private interface PathSyncOperation {
         SyncReport apply(Path path) throws Exception;

@@ -8,6 +8,7 @@
     { key: "chip", label: "Chip", validate: "/api/sync/chip/validate", sync: "/api/sync/chip", template: "/api/templates/chip.csv" },
     { key: "celular", label: "Celular", validate: "/api/sync/celular/validate", sync: "/api/sync/celular", template: "/api/templates/celular.csv" },
     { key: "colaborador", label: "Colaborador", validate: "/api/sync/colaborador/validate", sync: "/api/sync/colaborador", template: "/api/templates/colaborador.csv" },
+    { key: "garantia", label: "Garantia", validate: "/api/sync/garantia/validate", sync: "/api/sync/garantia", template: "/api/templates/garantia.csv" },
   ];
 
   const LOOKUPS = [
@@ -21,7 +22,7 @@
     { path: "/api/computers/summary", label: "Computers (id + nome)" },
   ];
 
-  const ASSET_KEYS = ["starlink", "chip", "celular", "colaborador"];
+  const ASSET_KEYS = ["starlink", "chip", "celular", "colaborador", "garantia"];
 
   let assetConfig = [];
   let currentRoute = "dashboard";
@@ -146,6 +147,24 @@
     let html = `<div class="table-wrap"><table class="data"><thead><tr><th>ID</th><th>${escapeHtml(secondColLabel)}</th></tr></thead><tbody>`;
     for (const row of items) {
       html += `<tr><td>${row.id}</td><td>${escapeHtml(row.name)}</td></tr>`;
+    }
+    html += "</tbody></table></div>";
+    return html;
+  }
+
+  function renderComputerReportTable(items) {
+    if (!items || items.length === 0) {
+      return '<p class="empty">Nenhum registro retornado.</p>';
+    }
+    let html = `<div class="table-wrap"><table class="data"><thead><tr><th>ID</th><th>Patrimônio</th><th>Serial</th><th>Garantias</th><th>Match</th></tr></thead><tbody>`;
+    for (const row of items) {
+      html += `<tr>
+        <td>${escapeHtml(row.computerId)}</td>
+        <td>${escapeHtml(row.patrimonio || "")}</td>
+        <td>${escapeHtml(row.serial || "")}</td>
+        <td>${escapeHtml(row.garantiaCount || 0)}</td>
+        <td>${escapeHtml((row.matchedBy || []).join(", "))}</td>
+      </tr>`;
     }
     html += "</tbody></table></div>";
     return html;
@@ -365,11 +384,12 @@
     const sections = [];
 
     try {
-      const computers = await GlpiApi.get("/api/computers/summary?range=0-499");
+      const computersReport = await GlpiApi.get("/api/computers/report?range=0-499");
       sections.push({
         title: "Computers",
         filter: true,
-        items: computers,
+        items: computersReport.items || [],
+        computerReport: true,
       });
     } catch (e) {
       sections.push({ title: "Computers", error: e.message });
@@ -401,7 +421,7 @@
         <div class="card inv-section" style="margin-bottom:1rem" data-section="${escapeHtml(sec.title)}">
           <h2>${escapeHtml(sec.title)} <span class="badge badge-muted">${count}</span></h2>
           <input type="search" class="inv-filter" placeholder="Filtrar por id ou nome…" style="width:100%;max-width:320px;margin-bottom:0.75rem;padding:0.5rem 0.75rem;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text)">
-          <div class="inv-table">${renderIdNameTable(sec.items)}</div>
+          <div class="inv-table">${sec.computerReport ? renderComputerReportTable(sec.items) : renderIdNameTable(sec.items)}</div>
         </div>
       `;
     }
@@ -422,9 +442,11 @@
         const sec = sections.find((s) => s.title === title);
         if (!sec?.items) return;
         const filtered = sec.items.filter(
-          (r) => String(r.id).includes(q) || (r.name || "").toLowerCase().includes(q)
+          sec.computerReport
+            ? String(r.computerId).includes(q) || (r.patrimonio || "").toLowerCase().includes(q) || (r.serial || "").toLowerCase().includes(q)
+            : String(r.id).includes(q) || (r.name || "").toLowerCase().includes(q)
         );
-        tableWrap.innerHTML = renderIdNameTable(filtered);
+        tableWrap.innerHTML = sec.computerReport ? renderComputerReportTable(filtered) : renderIdNameTable(filtered);
       });
     });
   }

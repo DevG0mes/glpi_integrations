@@ -28,7 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-@Tag(name = "Ativos customizados", description = "Starlink, Chip, Celular, Colaborador. assetKey: starlink | chip | celular | colaborador")
+@Tag(name = "Ativos customizados", description = "Starlink, Chip, Celular, Colaborador, Garantia. assetKey: starlink | chip | celular | colaborador | garantia")
 @RestController
 @RequestMapping("/api/custom-assets")
 public class CustomAssetController {
@@ -135,7 +135,7 @@ public class CustomAssetController {
 
     @GetMapping("/{assetKey}/summary")
     public ResponseEntity<List<IdNameItem>> summary(
-            @Parameter(description = "starlink, chip, celular ou colaborador") @PathVariable String assetKey,
+            @Parameter(description = "starlink, chip, celular, colaborador ou garantia") @PathVariable String assetKey,
             @RequestParam(defaultValue = "0-999") String range) {
         var definition = assetTypeRegistry.get(assetKey);
         return ResponseEntity.ok(glpiIntegrationService.listCustomAssetIdAndNames(definition.itemType(), range));

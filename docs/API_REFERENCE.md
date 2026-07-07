@@ -53,6 +53,7 @@ Listas **id + nome** (ou id + login) do GLPI para montar planilhas e resolver te
 |--------|------|--------------|----------------|
 | GET | `/api/computers/summary` | `range=0-999` | Lista resumida: id + nome de cada Computer. |
 | GET | `/api/computers` | `range`, `expandDropdowns=false` | Lista completa de Computers (JSON bruto GLPI). |
+| GET | `/api/computers/report` | `range=0-999` | Relatório enriquecido com garantias relacionadas por patrimônio e serial. |
 | GET | `/api/computers/{id}` | `expandDropdowns=false` | Um Computer por id. |
 | PUT | `/api/computers/{id}` | JSON `ComputerUpdateRequest` | Atualiza **um** Computer (campos como `users_id`, `name`, `serial`, etc.). |
 
@@ -73,21 +74,21 @@ Content-Type: application/json
 
 ## Ativos customizados — rotas gerais
 
-Válidas para `starlink`, `chip` e `celular` onde aparece `{assetKey}`.
+Válidas para `starlink`, `chip`, `celular`, `colaborador` e `garantia` onde aparece `{assetKey}`.
 
 | Método | Rota | Para que serve |
 |--------|------|----------------|
-| GET | `/api/custom-assets/discover` | Testa itemtypes GLPI 11 para Starlink, Chip e Celular; sugere linhas para `application-local.properties`. |
+| GET | `/api/custom-assets/discover` | Testa itemtypes GLPI 11 para Starlink, Chip, Celular, Colaborador e Garantia; sugere linhas para `application-local.properties`. |
 | GET | `/api/custom-assets/definitions` | Lista definições de ativo cadastradas no GLPI (`system_name`, rótulo). |
 | GET | `/api/custom-assets/config` | Configuração atual do middleware: itemtypes, colunas da planilha → campos GLPI. |
-| GET | `/api/custom-assets/{assetKey}/discover` | Descobre itemtype de **um** ativo (`starlink`, `chip` ou `celular`). |
+| GET | `/api/custom-assets/{assetKey}/discover` | Descobre itemtype de **um** ativo (`starlink`, `chip`, `celular`, `colaborador` ou `garantia`). |
 | GET | `/api/custom-assets/{assetKey}/discover?systemName=Starlink` | Mesmo discover com nome do sistema informado manualmente. |
 | GET | `/api/custom-assets/{assetKey}/summary` | `range=0-999` — id + nome dos itens já cadastrados no GLPI. |
 | GET | `/api/custom-assets/{assetKey}/probe` | Testa se o itemtype configurado responde (lista 0-0). |
 | GET | `/api/custom-assets/{assetKey}/items/{itemId}` | Item completo no GLPI + lista `customFieldKeys` (nomes API dos campos custom). |
 | POST | `/api/custom-assets/{assetKey}/items/{itemId}/update-probe` | JSON opcional — testa PUT campo a campo (diagnóstico de `ERROR_GLPI_UPDATE`). |
 
-`{assetKey}`: `starlink` | `chip` | `celular`
+`{assetKey}`: `starlink` | `chip` | `celular` | `colaborador` | `garantia`
 
 ---
 
@@ -181,6 +182,19 @@ Válidas para `starlink`, `chip` e `celular` onde aparece `{assetKey}`.
 **Mapeamento de patrimônio em Computers:** as colunas `nome`, `ATIVO`, `patrimonio` e `numero_patrimonio` são aceitas como origem do campo `name` no GLPI.
 
 **Campos opcionais adicionais em Computers:** `vencimento_garantia` e `cod_mega`. O campo `vencimento_garantia` aceita `YYYY-MM-DD`, `DD/MM/YYYY`, `YYYY-MM-DD HH:mm[:ss]` ou `DD/MM/YYYY HH:mm[:ss]` e é enviado ao GLPI como `YYYY-MM-DD HH:mm:ss`. O campo `cod_mega` é texto livre.
+
+**Relatório enriquecido de Computers:** `GET /api/computers/report` cruza `Computer.name` com o patrimônio da garantia (`name`) e `Computer.serial` com `custom_numero_de_serie`, retornando as garantias relacionadas para cada equipamento.
+
+---
+
+## Garantia — sincronização por planilha
+
+| Método | Rota | Body | Para que serve |
+|--------|------|------|----------------|
+| POST | `/api/sync/garantia/validate` | `file` = CSV/XLSX | Dry-run da planilha de Garantias. |
+| POST | `/api/sync/garantia` | `file` = CSV/XLSX | Sincroniza Garantias no GLPI: atualiza por `id_ativo`/nome quando existir e cria quando não existir. |
+
+**Colunas esperadas em Garantia:** `nome` ou `patrimonio`, `status`, `vencimento_garantia`, `custo`, `numero_de_serie`, `nfs`, `modelo_garantia`.
 
 ---
 

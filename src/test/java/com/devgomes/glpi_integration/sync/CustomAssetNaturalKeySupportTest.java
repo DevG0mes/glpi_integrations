@@ -40,4 +40,11 @@ class CustomAssetNaturalKeySupportTest {
         CustomAssetRow row = new CustomAssetRow(2, 0, "8955012345678901999", Map.of("iccid", "8955012345678901999"));
         assertThat(CustomAssetNaturalKeySupport.displayNameForCreate(row, def)).isEqualTo("8955012345678901999");
     }
+
+    @Test
+    void garantiaAliasesIncludePatrimonio() {
+        var def = properties.getDefinition("garantia");
+        assertThat(CustomAssetNaturalKeySupport.spreadsheetAliases(def))
+                .contains("nome", "patrimonio", "patrimonio_notebook", "numero_patrimonio");
+    }
 }

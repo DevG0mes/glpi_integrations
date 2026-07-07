@@ -3,6 +3,7 @@ package com.devgomes.glpi_integration.web;
 import com.devgomes.glpi_integration.dto.ComputerListResponse;
 import com.devgomes.glpi_integration.dto.ComputerUpdateRequest;
 import com.devgomes.glpi_integration.dto.IdNameItem;
+import com.devgomes.glpi_integration.service.ComputerWarrantyReportService;
 import com.devgomes.glpi_integration.service.GlpiIntegrationService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
@@ -24,9 +25,13 @@ import java.util.Map;
 public class ComputerController {
 
     private final GlpiIntegrationService glpiIntegrationService;
+    private final ComputerWarrantyReportService computerWarrantyReportService;
 
-    public ComputerController(GlpiIntegrationService glpiIntegrationService) {
+    public ComputerController(
+            GlpiIntegrationService glpiIntegrationService,
+            ComputerWarrantyReportService computerWarrantyReportService) {
         this.glpiIntegrationService = glpiIntegrationService;
+        this.computerWarrantyReportService = computerWarrantyReportService;
     }
 
     /** Somente id + name de cada Computer. */
@@ -42,6 +47,12 @@ public class ComputerController {
             @RequestParam(defaultValue = "0-999") String range,
             @RequestParam(defaultValue = "false") boolean expandDropdowns) {
         return ResponseEntity.ok(glpiIntegrationService.listComputers(range, expandDropdowns));
+    }
+
+    @GetMapping("/report")
+    public ResponseEntity<Map<String, Object>> computerReport(
+            @RequestParam(defaultValue = "0-999") String range) {
+        return ResponseEntity.ok(computerWarrantyReportService.buildReport(range));
     }
 
     @GetMapping("/{id}")

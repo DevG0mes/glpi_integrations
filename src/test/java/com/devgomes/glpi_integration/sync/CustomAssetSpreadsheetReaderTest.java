@@ -40,4 +40,16 @@ class CustomAssetSpreadsheetReaderTest {
         assertThat(rows.getFirst().values()).containsEntry("imei", "350000000000001");
         assertThat(rows.getFirst().values()).containsEntry("modelo", "Galaxy A14");
     }
+
+    @Test
+    void read_parsesGarantiaCsv() throws Exception {
+        Path file = Path.of(new ClassPathResource("sample-garantia.csv").getURI());
+
+        var rows = reader.read(file, "garantia");
+
+        assertThat(rows).hasSize(1);
+        assertThat(rows.getFirst().naturalKeyValue()).isEqualTo("PSI-001");
+        assertThat(rows.getFirst().values()).containsEntry("numero_de_serie", "ABC123XYZ");
+        assertThat(rows.getFirst().values()).containsEntry("modelo_garantia", "Onsite 36 meses");
+    }
 }

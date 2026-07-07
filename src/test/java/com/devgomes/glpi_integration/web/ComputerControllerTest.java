@@ -1,5 +1,6 @@
 package com.devgomes.glpi_integration.web;
 
+import com.devgomes.glpi_integration.service.ComputerWarrantyReportService;
 import com.devgomes.glpi_integration.service.GlpiIntegrationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,6 +24,9 @@ class ComputerControllerTest {
 
     @Mock
     private GlpiIntegrationService glpiIntegrationService;
+
+    @Mock
+    private ComputerWarrantyReportService computerWarrantyReportService;
 
     @InjectMocks
     private ComputerController computerController;

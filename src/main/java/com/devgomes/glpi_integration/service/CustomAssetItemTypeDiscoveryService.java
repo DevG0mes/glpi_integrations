@@ -183,6 +183,7 @@ public class CustomAssetItemTypeDiscoveryService {
             case "chip" -> "Chip";
             case "celular" -> "Celular";
             case "colaborador" -> "Colaborador";
+            case "garantia" -> "ControleGarantia";
             default -> assetKey;
         };
     }
@@ -202,6 +203,7 @@ public class CustomAssetItemTypeDiscoveryService {
         putPropertyLine(lines, "GLPI_ITEMTYPE_CHIP", assetMap.get("chip"));
         putPropertyLine(lines, "GLPI_ITEMTYPE_CELULAR", assetMap.get("celular"));
         putPropertyLine(lines, "GLPI_ITEMTYPE_COLABORADOR", assetMap.get("colaborador"));
+        putPropertyLine(lines, "GLPI_ITEMTYPE_GARANTIA", assetMap.get("garantia"));
         return lines;
     }
 

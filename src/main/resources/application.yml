@@ -29,6 +29,9 @@ glpi:
         natural-key-field: custom_imei
       colaborador:
         item-type: ${GLPI_ITEMTYPE_COLABORADOR:Glpi\\Asset\\AssetDefinition/Colaborador}
+      garantia:
+        item-type: ${GLPI_ITEMTYPE_GARANTIA:Glpi\\Asset\\AssetDefinition/ControleGarantia}
+        natural-key-field: name
 
 
 springdoc:
