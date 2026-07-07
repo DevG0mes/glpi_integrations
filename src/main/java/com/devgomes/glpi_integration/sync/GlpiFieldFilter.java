@@ -16,6 +16,9 @@ public final class GlpiFieldFilter {
     private static final Set<String> CONTEXT_FIELDS = Set.of(
             "entities_id", "is_recursive", "is_deleted", "is_template", "is_dynamic"
     );
+    private static final Set<String> PRESERVED_NON_CUSTOM_FIELDS = Set.of(
+            "vencimento_garantia"
+    );
 
     private GlpiFieldFilter() {
     }
@@ -32,7 +35,7 @@ public final class GlpiFieldFilter {
 
         for (Map.Entry<String, Object> entry : proposed.entrySet()) {
             String key = entry.getKey();
-            if (itemKeys.contains(key) || isCustomField(key)) {
+            if (itemKeys.contains(key) || isPreservedField(key)) {
                 retained.put(key, entry.getValue());
             } else {
                 dropped.add(key);
@@ -62,6 +65,10 @@ public final class GlpiFieldFilter {
 
     private static boolean isCustomField(String key) {
         return key != null && key.startsWith("custom_");
+    }
+
+    private static boolean isPreservedField(String key) {
+        return isCustomField(key) || PRESERVED_NON_CUSTOM_FIELDS.contains(key);
     }
 
     public record FilterResult(Map<String, Object> fields, List<String> droppedFieldNames) {

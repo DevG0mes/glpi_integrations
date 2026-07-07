@@ -52,4 +52,19 @@ class GlpiFieldFilterTest {
         assertThat(result.fields()).containsEntry("custom_vencimento", "2026-06-30");
         assertThat(result.droppedFieldNames()).isEmpty();
     }
+
+    @Test
+    void keepsGarantiaDueDateEvenWhenGetItemDoesNotExposeIt() {
+        Map<String, Object> proposed = Map.of(
+                "vencimento_garantia", "2026-07-21 12:00:00",
+                "name", "PSI-268");
+        Map<String, Object> existing = Map.of(
+                "id", 1,
+                "name", "PSI-268");
+
+        GlpiFieldFilter.FilterResult result = GlpiFieldFilter.retainFieldsKnownToItem(proposed, existing);
+
+        assertThat(result.fields()).containsEntry("vencimento_garantia", "2026-07-21 12:00:00");
+        assertThat(result.droppedFieldNames()).isEmpty();
+    }
 }
