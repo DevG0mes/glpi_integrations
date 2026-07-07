@@ -26,6 +26,9 @@ public final class GlpiItemTypePath {
                 .replace("%5C", "\\")
                 .replace("%5c", "\\")
                 .trim();
+        while (normalized.contains("\\\\")) {
+            normalized = normalized.replace("\\\\", "\\");
+        }
 
         List<String> segments = new ArrayList<>();
         if (normalized.contains("/")) {
@@ -86,6 +89,9 @@ public final class GlpiItemTypePath {
                 .replace("%5C", "\\")
                 .replace("%5c", "\\")
                 .trim();
+        while (normalized.contains("\\\\")) {
+            normalized = normalized.replace("\\\\", "\\");
+        }
         int slash = normalized.indexOf('/');
         if (slash >= 0 && slash < normalized.length() - 1) {
             return normalized.substring(slash + 1).trim();

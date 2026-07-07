@@ -33,7 +33,7 @@ public class GlpiCustomAssetsProperties {
             return defaults;
         }
         return new CustomAssetDefinition(
-                coalesce(override.itemType(), defaults.itemType()),
+                normalizeItemType(coalesce(override.itemType(), defaults.itemType())),
                 coalesce(override.naturalKeyField(), defaults.naturalKeyField()),
                 defaults.sensitiveFieldNames(),
                 defaults.columns()
@@ -42,6 +42,17 @@ public class GlpiCustomAssetsProperties {
 
     private static String coalesce(String value, String fallback) {
         return value == null || value.isBlank() ? fallback : value;
+    }
+
+    private static String normalizeItemType(String itemType) {
+        if (itemType == null || itemType.isBlank()) {
+            return itemType;
+        }
+        String normalized = itemType.trim();
+        while (normalized.contains("\\\\")) {
+            normalized = normalized.replace("\\\\", "\\");
+        }
+        return normalized;
     }
 
     private static Map<String, CustomAssetDefinition> defaultTypes() {
