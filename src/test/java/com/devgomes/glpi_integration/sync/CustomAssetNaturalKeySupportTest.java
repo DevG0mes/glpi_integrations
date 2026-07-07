@@ -42,9 +42,8 @@ class CustomAssetNaturalKeySupportTest {
     }
 
     @Test
-    void garantiaAliasesIncludePatrimonio() {
+    void garantiaAliasesIncludeNome() {
         var def = properties.getDefinition("garantia");
-        assertThat(CustomAssetNaturalKeySupport.spreadsheetAliases(def))
-                .contains("nome", "patrimonio", "patrimonio_notebook", "numero_patrimonio");
+        assertThat(CustomAssetNaturalKeySupport.spreadsheetAliases(def)).containsExactly("nome");
     }
 }

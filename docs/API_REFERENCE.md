@@ -192,9 +192,9 @@ Válidas para `starlink`, `chip`, `celular`, `colaborador` e `garantia` onde apa
 | Método | Rota | Body | Para que serve |
 |--------|------|------|----------------|
 | POST | `/api/sync/garantia/validate` | `file` = CSV/XLSX | Dry-run da planilha de Garantias. |
-| POST | `/api/sync/garantia` | `file` = CSV/XLSX | Sincroniza Garantias no GLPI: atualiza por `id_ativo`/nome quando existir e cria quando não existir. |
+| POST | `/api/sync/garantia` | `file` = CSV/XLSX | Sincroniza Garantias no GLPI: atualiza por `nome` quando existir e cria quando não existir. |
 
-**Colunas esperadas em Garantia:** `nome` ou `patrimonio`, `status`, `vencimento_garantia`, `custo`, `numero_de_serie`, `nfs`, `modelo_garantia`.
+**Colunas esperadas em Garantia:** `Nome`, `Status`, `Vencimento Garantia`, `Numero de Serie`, `Custo`, `NFS`, `Modelo Garantia`.
 
 ---
 

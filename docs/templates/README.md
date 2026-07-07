@@ -36,7 +36,7 @@ Arquivos para importar via `POST /api/sync/{computers|starlink|chip|celular|gara
 
 ### Garantia
 
-`id_ativo`, `nome`, `status`, `vencimento_garantia`, `custo`, `numero_de_serie`, `nfs`, `modelo_garantia`
+`Nome`, `Status`, `Vencimento Garantia`, `Numero de Serie`, `Custo`, `NFS`, `Modelo Garantia`
 
 Linha 2 = exemplo opcional — substitua pelos seus dados ou apague após copiar o cabeçalho.
 

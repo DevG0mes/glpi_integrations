@@ -129,15 +129,10 @@ public class GlpiCustomAssetsProperties {
                 List.of(),
                 Map.ofEntries(
                         Map.entry("nome", new FieldMapping("name", FieldResolverType.NATURAL_KEY)),
-                        Map.entry("patrimonio", new FieldMapping("name", FieldResolverType.NATURAL_KEY)),
-                        Map.entry("patrimonio_notebook", new FieldMapping("name", FieldResolverType.NATURAL_KEY)),
-                        Map.entry("numero_patrimonio", new FieldMapping("name", FieldResolverType.NATURAL_KEY)),
                         Map.entry("status", new FieldMapping("states_id", FieldResolverType.STATE_LABEL)),
                         Map.entry("vencimento_garantia", new FieldMapping("custom_vencimento_garantia", FieldResolverType.DATE)),
                         Map.entry("custo", new FieldMapping("custom_custo", FieldResolverType.DIRECT)),
                         Map.entry("numero_de_serie", new FieldMapping("custom_numero_de_serie", FieldResolverType.DIRECT)),
-                        Map.entry("numero_serie", new FieldMapping("custom_numero_de_serie", FieldResolverType.DIRECT)),
-                        Map.entry("serial", new FieldMapping("custom_numero_de_serie", FieldResolverType.DIRECT)),
                         Map.entry("nfs", new FieldMapping("custom_nfs", FieldResolverType.DIRECT)),
                         Map.entry("modelo_garantia", new FieldMapping("custom_modelo_garantia", FieldResolverType.DIRECT))
                 )

@@ -1,2 +1,2 @@
-id_ativo;nome;status;vencimento_garantia;custo;numero_de_serie;nfs;modelo_garantia
-1;PSI-001;Ativa;2026-12-31;R$ 1.500,00;ABC123XYZ;NFS-0001;Onsite 36 meses
+Nome;Status;Vencimento Garantia;Numero de Serie;Custo;NFS;Modelo Garantia
+PSI-001;Ativa;2026-12-31;ABC123XYZ;R$ 1.500,00;NFS-0001;Onsite 36 meses
