@@ -89,4 +89,17 @@ class SyncFieldResolverTest {
 
         assertThat(fields).containsEntry("custom_vencimento", "2026-06-30");
     }
+
+    @Test
+    void resolveCustomAssetFields_normalizesGarantiaDueDateTime() {
+        var definition = new GlpiCustomAssetsProperties().getDefinition("garantia");
+        var values = new LinkedHashMap<String, String>();
+        values.put("nome", "PSI-268");
+        values.put("vencimento_garantia", "21/07/2026 12:00");
+        var row = new CustomAssetRow(2, 0, "PSI-268", values);
+
+        var fields = SyncFieldResolver.resolveCustomAssetFields("garantia", row, definition, SyncLookupIndexes.empty());
+
+        assertThat(fields).containsEntry("vencimento_garantia", "2026-07-21 12:00:00");
+    }
 }

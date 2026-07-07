@@ -109,6 +109,7 @@ public final class SyncFieldResolver {
                 yield indexes.locationsByLabel().get(normalizeLabelKey(raw));
             }
             case DATE -> normalizeDate(raw);
+            case DATETIME -> normalizeDateTime(raw);
         };
     }
 
