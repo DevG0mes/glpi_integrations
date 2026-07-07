@@ -64,7 +64,7 @@ public class ComputerWarrantyReportService {
                     .distinct()
                     .toList());
             row.put("garantiaVencimentos", matches.stream()
-                    .map(item -> stringValue(item.get("custom_vencimento_garantia")))
+                    .map(item -> stringValue(item.get("vencimento_garantia")))
                     .filter(value -> !value.isBlank())
                     .distinct()
                     .toList());
