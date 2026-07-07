@@ -19,7 +19,9 @@ public record ComputerUpdateRequest(
         String name,
         String serial,
         String otherserial,
-        String comment
+        String comment,
+        @JsonProperty("vencimento_garantia") String vencimentoGarantia,
+        @JsonProperty("cod_mega") String codMega
 ) {
 
     public Map<String, Object> toInputMap() {
@@ -35,6 +37,8 @@ public record ComputerUpdateRequest(
         putIfNotNull(input, "serial", serial);
         putIfNotNull(input, "otherserial", otherserial);
         putIfNotNull(input, "comment", comment);
+        putIfNotNull(input, "vencimento_garantia", vencimentoGarantia);
+        putIfNotNull(input, "cod_mega", codMega);
         return input;
     }
 

@@ -147,7 +147,9 @@ public class ComputerSyncBatchService {
                     row.assetName(),
                     request.serial(),
                     request.otherserial(),
-                    request.comment()
+                    request.comment(),
+                    request.vencimentoGarantia(),
+                    request.codMega()
             );
         }
         return request;

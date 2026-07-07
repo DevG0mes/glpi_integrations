@@ -16,7 +16,8 @@ class SyncFieldResolverTest {
         var row = new AssetUpdateRow(
                 2, 1558, null, null, "evellyn.cavalcante", null, "Em uso",
                 6, "CTVMLZ1", null, null,
-                null, null, null, null, null, null, null, null, null);
+                null, null, null, null, null, null, null, null, null,
+                "30/06/2026 14:30", "MEGA-001");
 
         var indexes = new SyncLookupIndexes(
                 Map.of("evellyn.cavalcante", 99),
@@ -32,6 +33,8 @@ class SyncFieldResolverTest {
         assertThat(request.statesId()).isEqualTo(3);
         assertThat(request.computermodelsId()).isEqualTo(6);
         assertThat(request.serial()).isEqualTo("CTVMLZ1");
+        assertThat(request.vencimentoGarantia()).isEqualTo("2026-06-30 14:30:00");
+        assertThat(request.codMega()).isEqualTo("MEGA-001");
     }
 
     @Test
@@ -61,6 +64,18 @@ class SyncFieldResolverTest {
         assertThatThrownBy(() -> SyncFieldResolver.normalizeDate("30-06-26"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Use YYYY-MM-DD ou DD/MM/YYYY");
+    }
+
+    @Test
+    void normalizeDateTime_convertsBrazilianDateTime() {
+        assertThat(SyncFieldResolver.normalizeDateTime("30/06/2026 14:30"))
+                .isEqualTo("2026-06-30 14:30:00");
+    }
+
+    @Test
+    void normalizeDateTime_defaultsDateOnlyToMidnight() {
+        assertThat(SyncFieldResolver.normalizeDateTime("2026-06-30"))
+                .isEqualTo("2026-06-30 00:00:00");
     }
 
     @Test

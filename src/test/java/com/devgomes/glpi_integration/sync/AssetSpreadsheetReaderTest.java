@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class AssetSpreadsheetReaderTest {
 
@@ -24,9 +25,13 @@ class AssetSpreadsheetReaderTest {
         assertThat(rows.getFirst().computermodelsId()).isEqualTo(1);
         assertThat(rows.getFirst().responsibleLogin()).isEqualTo("evellyn.cavalcante");
         assertThat(rows.getFirst().statusLabel()).isEqualTo("Em uso");
+        assertThat(rows.getFirst().vencimentoGarantia()).isEqualTo("30/06/2026 14:30");
+        assertThat(rows.getFirst().codMega()).isEqualTo("MEGA-001");
         assertThat(rows.getFirst().usesNameLookup()).isFalse();
         assertThat(rows.get(1).responsibleLogin()).isNull();
         assertThat(rows.get(1).statusLabel()).isEqualTo("Estoque");
+        assertThat(rows.get(1).vencimentoGarantia()).isNull();
+        assertThat(rows.get(1).codMega()).isNull();
     }
 
     @Test
@@ -38,6 +43,8 @@ class AssetSpreadsheetReaderTest {
         assertThat(rows).hasSize(1);
         assertThat(rows.getFirst().glpiId()).isEqualTo(1558);
         assertThat(rows.getFirst().computermodelsId()).isEqualTo(1);
+        assertThat(rows.getFirst().vencimentoGarantia()).isEqualTo("2026-06-30");
+        assertThat(rows.getFirst().codMega()).isEqualTo("MEGA-001");
     }
 
     @Test
@@ -66,5 +73,33 @@ class AssetSpreadsheetReaderTest {
         var rows = reader.read(file);
 
         assertThat(rows.getFirst().displayName()).isEqualTo("PSI-016");
+    }
+
+    @Test
+    void read_allowsMissingIdAtivoWhenAtivoColumnIsPresent() throws Exception {
+        Path file = Files.createTempFile("sample-computers-sem-id", ".csv");
+        Files.writeString(file, """
+                Service TAG,ATIVO,id_model,RESPONSAVEL,Status
+                9TCMLZ1,PSI-016,1,evellyn.cavalcante,Em uso
+                """);
+
+        var rows = reader.read(file);
+
+        assertThat(rows).hasSize(1);
+        assertThat(rows.getFirst().glpiId()).isZero();
+        assertThat(rows.getFirst().assetName()).isEqualTo("PSI-016");
+        assertThat(rows.getFirst().displayName()).isEqualTo("PSI-016");
+    }
+
+    @Test
+    void read_rejectsSpreadsheetWithoutIdAndWithoutNameLikeColumn() throws Exception {
+        Path file = Files.createTempFile("sample-computers-invalid", ".csv");
+        Files.writeString(file, """
+                Service TAG,id_model,RESPONSAVEL,Status
+                9TCMLZ1,1,evellyn.cavalcante,Em uso
+                """);
+
+        assertThatThrownBy(() -> reader.read(file))
+                .hasMessageContaining("Colunas insuficientes para identificar o Computer");
     }
 }

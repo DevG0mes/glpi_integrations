@@ -98,9 +98,11 @@ public class AssetSpreadsheetReader {
 
         boolean hasGlpiId = index.containsKey("glpi_id");
         boolean hasAssetId = index.containsKey("id_ativo");
-        if (!hasGlpiId && !hasAssetId) {
+        boolean hasDisplayName = index.containsKey("display_name");
+        if (!hasGlpiId && !hasAssetId && !hasDisplayName) {
             throw new IllegalArgumentException(
-                    "Coluna obrigatória ausente: informe id_ativo (ID do Computer no GLPI). "
+                    "Colunas insuficientes para identificar o Computer. "
+                            + "Informe ao menos uma destas: glpi_id, id_ativo, nome/ATIVO/patrimonio. "
                             + "Colunas detectadas: " + detected);
         }
         return index;
@@ -146,6 +148,12 @@ public class AssetSpreadsheetReader {
         if (normalized.equals("observacao") || normalized.equals("comment")) {
             putAlias(index, "comment", column);
         }
+        if (normalized.equals("vencimento_garantia")) {
+            putAlias(index, "vencimento_garantia", column);
+        }
+        if (normalized.equals("cod_mega")) {
+            putAlias(index, "cod_mega", column);
+        }
     }
 
     private static boolean isAssetIdColumn(String normalized) {
@@ -169,6 +177,7 @@ public class AssetSpreadsheetReader {
     private AssetUpdateRow mapRow(int lineNumber, String[] row, Map<String, Integer> headerIndex) {
         Integer glpiIdColumn = parseOptionalInt(row, headerIndex, "glpi_id");
         String idAtivoRaw = parseOptionalString(row, headerIndex, "id_ativo");
+        String displayName = parseOptionalString(row, headerIndex, "display_name");
 
         int resolvedGlpiId = 0;
         String lookupName = null;
@@ -181,8 +190,11 @@ public class AssetSpreadsheetReader {
             } else {
                 lookupName = idAtivoRaw.trim();
             }
+        } else if (displayName != null) {
+            lookupName = displayName.trim();
         } else {
-            throw new IllegalArgumentException("Informe glpi_id ou id_ativo na linha " + lineNumber);
+            throw new IllegalArgumentException(
+                    "Informe glpi_id, id_ativo ou nome/ATIVO na linha " + lineNumber);
         }
 
         var responsavel = parseResponsavel(row, headerIndex);
@@ -212,7 +224,9 @@ public class AssetSpreadsheetReader {
                 tipo.label(),
                 fabricante.id(),
                 fabricante.label(),
-                parseOptionalString(row, headerIndex, "display_name")
+                displayName,
+                parseOptionalString(row, headerIndex, "vencimento_garantia"),
+                parseOptionalString(row, headerIndex, "cod_mega")
         );
     }
 

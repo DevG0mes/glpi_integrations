@@ -40,7 +40,7 @@ class GlpiIntegrationServiceTest {
         }).when(sessionManager).runWithSession(any());
 
         service.updateComputer(10, new com.devgomes.glpi_integration.dto.ComputerUpdateRequest(
-                42, null, null, 1, 11, null, null, null, null, null, null));
+                42, null, null, 1, 11, null, null, null, null, null, null, null, null));
 
         verify(apiClient).updateComputer(eq("token-1"), eq(10), any());
     }

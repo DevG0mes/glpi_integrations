@@ -24,7 +24,9 @@ public record AssetUpdateRow(
         String computerTypeLabel,
         Integer manufacturersId,
         String manufacturerLabel,
-        String displayName
+        String displayName,
+        String vencimentoGarantia,
+        String codMega
 ) {
 
     public boolean usesNameLookup() {

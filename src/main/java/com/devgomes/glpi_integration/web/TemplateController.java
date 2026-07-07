@@ -24,7 +24,8 @@ import java.util.Set;
 public class TemplateController {
 
     private static final List<String> COMPUTER_HEADERS = List.of(
-            "id_ativo", "serial", "responsavel", "local", "grupo", "tipo", "fabricante", "nome", "observacao"
+            "id_ativo", "serial", "responsavel", "local", "grupo", "tipo", "fabricante",
+            "nome", "observacao", "vencimento_garantia", "cod_mega"
     );
 
     private final GlpiIntegrationService glpiIntegrationService;
@@ -70,7 +71,9 @@ public class TemplateController {
                     value(item.get("computertypes_id")),
                     value(item.get("manufacturers_id")),
                     value(item.get("name")),
-                    value(item.get("comment"))
+                    value(item.get("comment")),
+                    value(item.get("vencimento_garantia")),
+                    value(item.get("cod_mega"))
             ));
         }
         return toCsv(rows);

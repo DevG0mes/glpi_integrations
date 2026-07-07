@@ -6,6 +6,7 @@ import com.devgomes.glpi_integration.service.GlpiIntegrationService;
 
 import java.text.Normalizer;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
@@ -19,8 +20,16 @@ import java.util.Map;
 public final class SyncFieldResolver {
 
     private static final DateTimeFormatter ISO_DATE = DateTimeFormatter.ISO_LOCAL_DATE;
+    private static final DateTimeFormatter ISO_DATE_TIME =
+            DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss").withResolverStyle(ResolverStyle.STRICT);
     private static final DateTimeFormatter BRAZILIAN_DATE =
             DateTimeFormatter.ofPattern("dd/MM/uuuu").withResolverStyle(ResolverStyle.STRICT);
+    private static final DateTimeFormatter BRAZILIAN_DATE_TIME =
+            DateTimeFormatter.ofPattern("dd/MM/uuuu HH:mm:ss").withResolverStyle(ResolverStyle.STRICT);
+    private static final DateTimeFormatter BRAZILIAN_DATE_TIME_MINUTES =
+            DateTimeFormatter.ofPattern("dd/MM/uuuu HH:mm").withResolverStyle(ResolverStyle.STRICT);
+    private static final DateTimeFormatter ISO_DATE_TIME_MINUTES =
+            DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm").withResolverStyle(ResolverStyle.STRICT);
 
     private SyncFieldResolver() {
     }
@@ -44,7 +53,9 @@ public final class SyncFieldResolver {
                 row.displayName(),
                 row.serial(),
                 row.otherserial(),
-                row.comment()
+                row.comment(),
+                normalizeDateTime(row.vencimentoGarantia()),
+                normalizeOptionalText(row.codMega())
         );
     }
 
@@ -116,6 +127,33 @@ public final class SyncFieldResolver {
                 "Data inválida: '" + raw + "'. Use YYYY-MM-DD ou DD/MM/YYYY.");
     }
 
+    static String normalizeDateTime(String raw) {
+        String value = raw == null ? "" : raw.trim();
+        if (value.isEmpty()) {
+            return null;
+        }
+        if (value.matches("\\d{4}-\\d{2}-\\d{2}")) {
+            return parseDate(value, ISO_DATE).atStartOfDay().format(ISO_DATE_TIME);
+        }
+        if (value.matches("\\d{2}/\\d{2}/\\d{4}")) {
+            return parseDate(value, BRAZILIAN_DATE).atStartOfDay().format(ISO_DATE_TIME);
+        }
+        if (value.matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}")) {
+            return parseDateTime(value, ISO_DATE_TIME).format(ISO_DATE_TIME);
+        }
+        if (value.matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}")) {
+            return parseDateTime(value, ISO_DATE_TIME_MINUTES).format(ISO_DATE_TIME);
+        }
+        if (value.matches("\\d{2}/\\d{2}/\\d{4} \\d{2}:\\d{2}:\\d{2}")) {
+            return parseDateTime(value, BRAZILIAN_DATE_TIME).format(ISO_DATE_TIME);
+        }
+        if (value.matches("\\d{2}/\\d{2}/\\d{4} \\d{2}:\\d{2}")) {
+            return parseDateTime(value, BRAZILIAN_DATE_TIME_MINUTES).format(ISO_DATE_TIME);
+        }
+        throw new IllegalArgumentException(
+                "Data/hora inválida: '" + raw + "'. Use YYYY-MM-DD[ HH:mm[:ss]] ou DD/MM/YYYY[ HH:mm[:ss]].");
+    }
+
     private static LocalDate parseDate(String value, DateTimeFormatter formatter) {
         try {
             return LocalDate.parse(value, formatter);
@@ -123,6 +161,22 @@ public final class SyncFieldResolver {
             throw new IllegalArgumentException(
                     "Data inválida: '" + value + "'. Use YYYY-MM-DD ou DD/MM/YYYY.", ex);
         }
+    }
+
+    private static LocalDateTime parseDateTime(String value, DateTimeFormatter formatter) {
+        try {
+            return LocalDateTime.parse(value, formatter);
+        } catch (DateTimeParseException ex) {
+            throw new IllegalArgumentException(
+                    "Data/hora inválida: '" + value + "'. Use YYYY-MM-DD[ HH:mm[:ss]] ou DD/MM/YYYY[ HH:mm[:ss]].", ex);
+        }
+    }
+
+    private static String normalizeOptionalText(String raw) {
+        if (isNullLiteral(raw)) {
+            return null;
+        }
+        return raw.trim();
     }
 
     private static Integer resolveUserId(Integer id, String label, Map<String, Integer> index) {

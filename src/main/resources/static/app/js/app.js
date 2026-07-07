@@ -243,7 +243,7 @@
       columns.length > 0
         ? `<div class="summary-chips">${columns.map((c) => `<span class="chip">${escapeHtml(c)}</span>`).join("")}</div>`
         : syncTypeKey === "computers"
-          ? `<p class="hint">Colunas comuns: <code>id_ativo</code>, <code>serial</code>, <code>responsavel</code>, <code>local</code>, <code>grupo</code>, <code>tipo</code>, <code>fabricante</code>, <code>nome</code>, <code>observacao</code></p>`
+          ? `<p class="hint">Colunas comuns: <code>id_ativo</code>, <code>serial</code>, <code>responsavel</code>, <code>local</code>, <code>grupo</code>, <code>tipo</code>, <code>fabricante</code>, <code>nome</code>, <code>observacao</code>, <code>vencimento_garantia</code>, <code>cod_mega</code></p>`
           : "";
 
     el.innerHTML = `

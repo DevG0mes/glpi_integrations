@@ -180,6 +180,8 @@ Válidas para `starlink`, `chip` e `celular` onde aparece `{assetKey}`.
 
 **Mapeamento de patrimônio em Computers:** as colunas `nome`, `ATIVO`, `patrimonio` e `numero_patrimonio` são aceitas como origem do campo `name` no GLPI.
 
+**Campos opcionais adicionais em Computers:** `vencimento_garantia` e `cod_mega`. O campo `vencimento_garantia` aceita `YYYY-MM-DD`, `DD/MM/YYYY`, `YYYY-MM-DD HH:mm[:ss]` ou `DD/MM/YYYY HH:mm[:ss]` e é enviado ao GLPI como `YYYY-MM-DD HH:mm:ss`. O campo `cod_mega` é texto livre.
+
 ---
 
 ## Upload de planilha (todas as rotas POST /api/sync/*)
