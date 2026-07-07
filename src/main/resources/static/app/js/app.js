@@ -156,13 +156,17 @@
     if (!items || items.length === 0) {
       return '<p class="empty">Nenhum registro retornado.</p>';
     }
-    let html = `<div class="table-wrap"><table class="data"><thead><tr><th>ID</th><th>Patrimônio</th><th>Serial</th><th>Garantias</th><th>Match</th></tr></thead><tbody>`;
+    let html = `<div class="table-wrap"><table class="data"><thead><tr><th>ID</th><th>Patrimônio</th><th>Serial</th><th>Garantias</th><th>Vencimento</th><th>Custo</th><th>NFS</th><th>Modelo Garantia</th><th>Match</th></tr></thead><tbody>`;
     for (const row of items) {
       html += `<tr>
         <td>${escapeHtml(row.computerId)}</td>
         <td>${escapeHtml(row.patrimonio || "")}</td>
         <td>${escapeHtml(row.serial || "")}</td>
         <td>${escapeHtml(row.garantiaCount || 0)}</td>
+        <td>${escapeHtml((row.garantiaVencimentos || []).join(", "))}</td>
+        <td>${escapeHtml((row.garantiaCustos || []).join(", "))}</td>
+        <td>${escapeHtml((row.garantiaNfs || []).join(", "))}</td>
+        <td>${escapeHtml((row.garantiaModelos || []).join(", "))}</td>
         <td>${escapeHtml((row.matchedBy || []).join(", "))}</td>
       </tr>`;
     }

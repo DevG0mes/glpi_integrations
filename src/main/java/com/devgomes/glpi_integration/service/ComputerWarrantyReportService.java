@@ -68,6 +68,21 @@ public class ComputerWarrantyReportService {
                     .filter(value -> !value.isBlank())
                     .distinct()
                     .toList());
+            row.put("garantiaCustos", matches.stream()
+                    .map(item -> stringValue(item.get("custom_custo")))
+                    .filter(value -> !value.isBlank())
+                    .distinct()
+                    .toList());
+            row.put("garantiaNfs", matches.stream()
+                    .map(item -> stringValue(item.get("custom_nfs")))
+                    .filter(value -> !value.isBlank())
+                    .distinct()
+                    .toList());
+            row.put("garantiaModelos", matches.stream()
+                    .map(item -> stringValue(item.get("custom_modelo_garantia")))
+                    .filter(value -> !value.isBlank())
+                    .distinct()
+                    .toList());
             row.put("computer", computer);
             row.put("garantias", matches);
             items.add(row);

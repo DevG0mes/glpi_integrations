@@ -183,7 +183,7 @@ Válidas para `starlink`, `chip`, `celular`, `colaborador` e `garantia` onde apa
 
 **Campos opcionais adicionais em Computers:** `vencimento_garantia` e `cod_mega`. O campo `vencimento_garantia` aceita `YYYY-MM-DD`, `DD/MM/YYYY`, `YYYY-MM-DD HH:mm[:ss]` ou `DD/MM/YYYY HH:mm[:ss]` e é enviado ao GLPI como `YYYY-MM-DD HH:mm:ss`. O campo `cod_mega` é texto livre.
 
-**Relatório enriquecido de Computers:** `GET /api/computers/report` cruza `Computer.name` com o patrimônio da garantia (`name`) e `Computer.serial` com `custom_numero_de_serie`, retornando as garantias relacionadas para cada equipamento.
+**Relatório enriquecido de Computers:** `GET /api/computers/report` cruza `Computer.name` com o patrimônio da garantia (`name`) e `Computer.serial` com `custom_numero_de_serie`, retornando para cada equipamento as garantias relacionadas com `Status`, `Vencimento Garantia`, `Custo`, `NFS` e `Modelo Garantia`.
 
 ---
 
