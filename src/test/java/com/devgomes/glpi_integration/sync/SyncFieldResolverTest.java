@@ -73,6 +73,12 @@ class SyncFieldResolverTest {
     }
 
     @Test
+    void normalizeDateTime_acceptsSpreadsheetStyleBrazilianDateTime() {
+        assertThat(SyncFieldResolver.normalizeDateTime("29/3/27 0:00"))
+                .isEqualTo("2027-03-29 00:00:00");
+    }
+
+    @Test
     void normalizeDateTime_defaultsDateOnlyToMidnight() {
         assertThat(SyncFieldResolver.normalizeDateTime("2026-06-30"))
                 .isEqualTo("2026-06-30 00:00:00");

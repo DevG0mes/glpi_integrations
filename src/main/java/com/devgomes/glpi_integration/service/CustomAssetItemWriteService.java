@@ -98,7 +98,8 @@ public class CustomAssetItemWriteService {
             Map<String, Object> fields) {
         Map<String, Object> dateFields = new LinkedHashMap<>();
         for (GlpiCustomAssetsProperties.FieldMapping mapping : definition.columns().values()) {
-            if (mapping.resolverType() == GlpiCustomAssetsProperties.FieldResolverType.DATE
+            if ((mapping.resolverType() == GlpiCustomAssetsProperties.FieldResolverType.DATE
+                    || mapping.resolverType() == GlpiCustomAssetsProperties.FieldResolverType.DATETIME)
                     && fields.containsKey(mapping.glpiField())) {
                 dateFields.put(mapping.glpiField(), fields.get(mapping.glpiField()));
             }

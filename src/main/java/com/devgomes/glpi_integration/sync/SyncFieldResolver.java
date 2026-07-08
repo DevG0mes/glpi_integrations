@@ -8,9 +8,12 @@ import java.text.Normalizer;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
+import java.time.temporal.ChronoField;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -24,12 +27,70 @@ public final class SyncFieldResolver {
             DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss").withResolverStyle(ResolverStyle.STRICT);
     private static final DateTimeFormatter BRAZILIAN_DATE =
             DateTimeFormatter.ofPattern("dd/MM/uuuu").withResolverStyle(ResolverStyle.STRICT);
+    private static final DateTimeFormatter BRAZILIAN_DATE_FLEX =
+            new DateTimeFormatterBuilder()
+                    .appendValue(ChronoField.DAY_OF_MONTH)
+                    .appendLiteral('/')
+                    .appendValue(ChronoField.MONTH_OF_YEAR)
+                    .appendLiteral('/')
+                    .appendValue(ChronoField.YEAR, 4)
+                    .toFormatter()
+                    .withResolverStyle(ResolverStyle.STRICT);
+    private static final DateTimeFormatter BRAZILIAN_DATE_SHORT_YEAR_FLEX =
+            new DateTimeFormatterBuilder()
+                    .appendValue(ChronoField.DAY_OF_MONTH)
+                    .appendLiteral('/')
+                    .appendValue(ChronoField.MONTH_OF_YEAR)
+                    .appendLiteral('/')
+                    .appendValueReduced(ChronoField.YEAR, 2, 2, 2000)
+                    .toFormatter()
+                    .withResolverStyle(ResolverStyle.STRICT);
     private static final DateTimeFormatter BRAZILIAN_DATE_TIME =
             DateTimeFormatter.ofPattern("dd/MM/uuuu HH:mm:ss").withResolverStyle(ResolverStyle.STRICT);
     private static final DateTimeFormatter BRAZILIAN_DATE_TIME_MINUTES =
             DateTimeFormatter.ofPattern("dd/MM/uuuu HH:mm").withResolverStyle(ResolverStyle.STRICT);
+    private static final DateTimeFormatter BRAZILIAN_DATE_TIME_FLEX =
+            new DateTimeFormatterBuilder()
+                    .append(BRAZILIAN_DATE_FLEX)
+                    .appendLiteral(' ')
+                    .appendValue(ChronoField.HOUR_OF_DAY)
+                    .appendLiteral(':')
+                    .appendValue(ChronoField.MINUTE_OF_HOUR)
+                    .optionalStart()
+                    .appendLiteral(':')
+                    .appendValue(ChronoField.SECOND_OF_MINUTE)
+                    .optionalEnd()
+                    .toFormatter()
+                    .withResolverStyle(ResolverStyle.STRICT);
+    private static final DateTimeFormatter BRAZILIAN_DATE_TIME_SHORT_YEAR_FLEX =
+            new DateTimeFormatterBuilder()
+                    .append(BRAZILIAN_DATE_SHORT_YEAR_FLEX)
+                    .appendLiteral(' ')
+                    .appendValue(ChronoField.HOUR_OF_DAY)
+                    .appendLiteral(':')
+                    .appendValue(ChronoField.MINUTE_OF_HOUR)
+                    .optionalStart()
+                    .appendLiteral(':')
+                    .appendValue(ChronoField.SECOND_OF_MINUTE)
+                    .optionalEnd()
+                    .toFormatter()
+                    .withResolverStyle(ResolverStyle.STRICT);
     private static final DateTimeFormatter ISO_DATE_TIME_MINUTES =
             DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm").withResolverStyle(ResolverStyle.STRICT);
+    private static final List<DateTimeFormatter> DATE_FORMATTERS = List.of(
+            ISO_DATE,
+            BRAZILIAN_DATE,
+            BRAZILIAN_DATE_FLEX,
+            BRAZILIAN_DATE_SHORT_YEAR_FLEX
+    );
+    private static final List<DateTimeFormatter> DATE_TIME_FORMATTERS = List.of(
+            ISO_DATE_TIME,
+            ISO_DATE_TIME_MINUTES,
+            BRAZILIAN_DATE_TIME,
+            BRAZILIAN_DATE_TIME_MINUTES,
+            BRAZILIAN_DATE_TIME_FLEX,
+            BRAZILIAN_DATE_TIME_SHORT_YEAR_FLEX
+    );
 
     private SyncFieldResolver() {
     }
@@ -118,14 +179,7 @@ public final class SyncFieldResolver {
         if (value.isEmpty()) {
             return null;
         }
-        if (value.matches("\\d{4}-\\d{2}-\\d{2}")) {
-            return parseDate(value, ISO_DATE).format(ISO_DATE);
-        }
-        if (value.matches("\\d{2}/\\d{2}/\\d{4}")) {
-            return parseDate(value, BRAZILIAN_DATE).format(ISO_DATE);
-        }
-        throw new IllegalArgumentException(
-                "Data inválida: '" + raw + "'. Use YYYY-MM-DD ou DD/MM/YYYY.");
+        return parseDate(value).format(ISO_DATE);
     }
 
     static String normalizeDateTime(String raw) {
@@ -133,44 +187,35 @@ public final class SyncFieldResolver {
         if (value.isEmpty()) {
             return null;
         }
-        if (value.matches("\\d{4}-\\d{2}-\\d{2}")) {
-            return parseDate(value, ISO_DATE).atStartOfDay().format(ISO_DATE_TIME);
+        try {
+            return parseDate(value).atStartOfDay().format(ISO_DATE_TIME);
+        } catch (IllegalArgumentException ignored) {
+            return parseDateTime(value).format(ISO_DATE_TIME);
         }
-        if (value.matches("\\d{2}/\\d{2}/\\d{4}")) {
-            return parseDate(value, BRAZILIAN_DATE).atStartOfDay().format(ISO_DATE_TIME);
-        }
-        if (value.matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}")) {
-            return parseDateTime(value, ISO_DATE_TIME).format(ISO_DATE_TIME);
-        }
-        if (value.matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}")) {
-            return parseDateTime(value, ISO_DATE_TIME_MINUTES).format(ISO_DATE_TIME);
-        }
-        if (value.matches("\\d{2}/\\d{2}/\\d{4} \\d{2}:\\d{2}:\\d{2}")) {
-            return parseDateTime(value, BRAZILIAN_DATE_TIME).format(ISO_DATE_TIME);
-        }
-        if (value.matches("\\d{2}/\\d{2}/\\d{4} \\d{2}:\\d{2}")) {
-            return parseDateTime(value, BRAZILIAN_DATE_TIME_MINUTES).format(ISO_DATE_TIME);
+    }
+
+    private static LocalDate parseDate(String value) {
+        for (DateTimeFormatter formatter : DATE_FORMATTERS) {
+            try {
+                return LocalDate.parse(value, formatter);
+            } catch (DateTimeParseException ignored) {
+                // Try next supported format.
+            }
         }
         throw new IllegalArgumentException(
-                "Data/hora inválida: '" + raw + "'. Use YYYY-MM-DD[ HH:mm[:ss]] ou DD/MM/YYYY[ HH:mm[:ss]].");
+                "Data inválida: '" + value + "'. Use YYYY-MM-DD ou DD/MM/YYYY.");
     }
 
-    private static LocalDate parseDate(String value, DateTimeFormatter formatter) {
-        try {
-            return LocalDate.parse(value, formatter);
-        } catch (DateTimeParseException ex) {
-            throw new IllegalArgumentException(
-                    "Data inválida: '" + value + "'. Use YYYY-MM-DD ou DD/MM/YYYY.", ex);
+    private static LocalDateTime parseDateTime(String value) {
+        for (DateTimeFormatter formatter : DATE_TIME_FORMATTERS) {
+            try {
+                return LocalDateTime.parse(value, formatter);
+            } catch (DateTimeParseException ignored) {
+                // Try next supported format.
+            }
         }
-    }
-
-    private static LocalDateTime parseDateTime(String value, DateTimeFormatter formatter) {
-        try {
-            return LocalDateTime.parse(value, formatter);
-        } catch (DateTimeParseException ex) {
-            throw new IllegalArgumentException(
-                    "Data/hora inválida: '" + value + "'. Use YYYY-MM-DD[ HH:mm[:ss]] ou DD/MM/YYYY[ HH:mm[:ss]].", ex);
-        }
+        throw new IllegalArgumentException(
+                "Data/hora inválida: '" + value + "'. Use YYYY-MM-DD[ HH:mm[:ss]] ou DD/MM/YYYY[ HH:mm[:ss]].");
     }
 
     private static String normalizeOptionalText(String raw) {
